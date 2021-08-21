@@ -13,6 +13,7 @@ class MABEnvironment():
         n_arms -> Number of arms
         value_generator -> Generator function for each arm hidden value (true reward)
         """
+        self.value_generator = value_generator
         self.arms = np.array([value_generator() for i in range(n_arms)])
         self.n_arms = n_arms
         self.pulls = np.zeros(n_arms) # Individual pull values
@@ -31,6 +32,20 @@ class MABEnvironment():
         self.pulls[n_arm] += 1
         self.steps += 1
         return self.pull(n_arm)
+
+    def soft_reset(self):
+        """
+        Only resets metrics but environment is kept the same
+        """
+        self.pulls = np.zeros(self.n_arms)
+        self.steps = 0
+        
+    def reset(self):
+        """
+        Resets environment internals
+        """
+        self.soft_reset()
+        self.arms = np.array([self.value_generator() for i in range(self.n_arms)])
 
     def get_optimal(self):
         return np.argmax(self.arms)

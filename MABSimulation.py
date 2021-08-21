@@ -7,6 +7,7 @@ MABSimulation Environment
 # TODO Add metrics
 
 import numpy as np
+import MABMetrics as mm
 from agents import EpsilonGreedyAgent
 from environments import GaussianEnvironment
 import matplotlib.pyplot as plt
@@ -14,49 +15,60 @@ import matplotlib.pyplot as plt
 class MABSimulation():
     """Class that carries MAB simulations""" 
 
-    def __init__(self, agent, environment, n_epochs):
-        self.agent = agent
+    def __init__(self, agents, environment, n_epochs, n_repeats=1):
+        """
+        Agents: list of agents to simulate
+        Environment: Environment object with the arms
+        n_epochs: Nº of iterations per agent on a given environment
+        n_repeats: Nº of environments per agent for robustness
+        """
+        self.agents = agents
         self.environment = environment
         self.n_epochs = n_epochs
-        self.rewards = np.empty(n_epochs)
-        self.sum_rewards = 0 
-        self.regrets = np.empty(n_epochs)
-        self.optimal_percents = np.empty(n_epochs)
-        self.sum_optimals = 0
+        self.metrics = [mm.MABMetrics(n_epochs) for i in range(len(agents))]
+        self.n_repeats = n_repeats
 
     def run(self):
-        optimal = self.environment.get_optimal()
-        optimal_value = self.environment.get_optimal_value()
-        for i in range(self.n_epochs):
-            # Ask the agent for an action
-            arm = self.agent.step()
-            # Get reward
-            reward = self.environment.step(arm)
-            # Feed agent
-            self.agent.reward(arm, reward)
-            # Update metrics
-            self.rewards[i] = reward
-            self.sum_rewards += reward
-            self.regrets[i] = (i+1)*optimal_value - self.sum_rewards 
-            if arm == optimal:
-                self.sum_optimals += 1
-            self.optimal_percents[i] = self.sum_optimals/(i+1)
 
-    def plot_rewards(self):
-        return plt.plot(self.rewards)
+        # Loops through the several environments
+        for iteration in range(self.n_repeats):
 
-    def plot_regret(self):
-        return plt.plot(self.regrets)
+            optimal = self.environment.get_optimal()
+            optimal_value = self.environment.get_optimal_value()
 
-    def plot_optimals(self):
-        return plt.plot(self.optimal_percents)
+            # Loops through the several agents
+            for agent_id, agent in enumerate(self.agents):
+
+                # Carry one experiment
+                for i in range(self.n_epochs):
+                    # Ask the agent for an action
+                    arm = agent.step()
+                    # Get reward
+                    reward = self.environment.step(arm)
+                    # Feed agent
+                    agent.reward(arm, reward)
+                    # Update metrics
+                    self.metrics[agent_id].update(i, reward, arm, optimal, optimal_value)
+                
+                self.environment.soft_reset()
+                self.metrics[agent_id].new_iteration()
+
+            self.environment.reset()
+
+    def plot_metrics(self, metric_name):
+        plots = []
+        for i in range(len(self.agents)):
+            plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
+        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))])
+        plt.show()
 
 ### Test
 n_arms = 10
-agent = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.01)
+agent1 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.1)
+agent2 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.1, optimism=1)
+agent3 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0)
 environment = GaussianEnvironment.GaussianEnvironment(n_arms)
-sim = MABSimulation(agent, environment, 2000)
+sim = MABSimulation([agent1, agent2, agent3], environment, 100, 2000)
 sim.run()
-sim.plot_optimals()
-plt.show()
+sim.plot_metrics('reward')
 

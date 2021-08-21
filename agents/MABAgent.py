@@ -13,6 +13,7 @@ class MABAgent():
         optimism -> starting value for rewards
         """
         self.averages = np.array([optimism if optimism else np.NINF] * n_arms)
+        self.optimism = optimism
         self.times_explored = np.zeros(n_arms)
         self.steps = 0
         self.n_arms = n_arms
@@ -32,6 +33,14 @@ class MABAgent():
         """Returns the arm that should be pulled. This should be overriden"""
         return 0
 
+    def reset(self):
+        """Resets agent."""
+        self.averages = np.array([self.optimism if self.optimism else np.NINF] * self.n_arms)
+        self.times_explored = np.zeros(self.n_arms)
+
     def get_best(self):
         """Returns the index of the best prediction so far"""
         return np.argmax(self.averages)
+
+    def get_name(self):
+        return "Default MAB"
