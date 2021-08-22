@@ -2,13 +2,10 @@
 MABSimulation Environment
 """
 
-# TODO Run multiple arm-types at once
-# TODO Average over many environments, percentage of optimal
-# TODO Add metrics
+# TODO work on plot labels
 
-import numpy as np
 import MABMetrics as mm
-from agents import EpsilonGreedyAgent
+from agents import EpsilonGreedyAgent, UCBAgent, EXP3Agent
 from environments import GaussianEnvironment
 import matplotlib.pyplot as plt
 
@@ -33,7 +30,6 @@ class MABSimulation():
         # Loops through the several environments
         for iteration in range(self.n_repeats):
 
-            optimal = self.environment.get_optimal()
             optimal_value = self.environment.get_optimal_value()
 
             # Loops through the several agents
@@ -48,10 +44,11 @@ class MABSimulation():
                     # Feed agent
                     agent.reward(arm, reward)
                     # Update metrics
-                    self.metrics[agent_id].update(i, reward, arm, optimal, optimal_value)
+                    self.metrics[agent_id].update(i, reward, optimal_value)
                 
                 self.environment.soft_reset()
                 self.metrics[agent_id].new_iteration()
+                agent.reset()
 
             self.environment.reset()
 
@@ -64,11 +61,14 @@ class MABSimulation():
 
 ### Test
 n_arms = 10
+n_iterations = 2000
+n_simulations = 2000
 agent1 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.1)
-agent2 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.1, optimism=1)
-agent3 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0)
+agent2 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0)
+agent3 = UCBAgent.UCBAgent(n_arms)
+agent4 = EXP3Agent.EXP3Agent(n_arms, exploration_rate=EXP3Agent.EXP3Gamma(3, n_iterations, n_arms))
 environment = GaussianEnvironment.GaussianEnvironment(n_arms)
-sim = MABSimulation([agent1, agent2, agent3], environment, 100, 2000)
+sim = MABSimulation([agent1, agent2, agent3, agent4], environment, n_iterations, n_simulations)
 sim.run()
 sim.plot_metrics('reward')
 

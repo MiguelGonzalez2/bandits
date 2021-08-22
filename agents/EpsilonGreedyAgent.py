@@ -18,9 +18,12 @@ class EpsilonGreedyAgent(MABAgent):
         averages = self.averages
         n_arms = self.n_arms
         if random.random() < self.epsilon:
-            return random.randint(0, n_arms-1)
+            arm = random.randint(0, n_arms-1)
+            return arm
         else:
-            return np.argmax(averages)
+            arm = np.random.choice(np.flatnonzero(averages == averages.max()))# Random tie-breaking
+            return arm
+        
 
     def get_name(self):
         return f"Epsilon-Greedy MAB w/e={self.epsilon}, opt={self.optimism}"
