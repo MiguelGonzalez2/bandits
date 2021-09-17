@@ -4,10 +4,10 @@ Environment class.
 
 import numpy as np
 
-class MABEnvironment():
+class Environment():
     """Implements abstract MABEnvironment w/ constant output"""
 
-    def __init__(self, n_arms, value_generator = (lambda : np.random.normal())):
+    def __init__(self, n_arms, value_generator = np.random.normal):
         """
         Initializes the environment.
         n_arms -> Number of arms
@@ -28,10 +28,25 @@ class MABEnvironment():
     def step(self, n_arm):
         """
         Returns reward for given arm, updating internal values
+        This is used for Multi Armed Bandits steps.
         """
         self.pulls[n_arm] += 1
         self.steps += 1
         return self.pull(n_arm)
+
+    def pairwise_step(self, n_arm1, n_arm2):
+        """
+        Returns rewards for a pair of arms, updating internal values.
+        This is used for Dueling Bandits steps. Note that the actual
+        rewards are returned so that numerical metrics can be computed
+        in order to compare with multi-armed bandits. HOWEVER, dueling
+        bandits should never see these values, only the result of the
+        pairwise comparison.
+        """
+        self.pulls[n_arm1] += 1
+        self.pulls[n_arm2] += 1
+        self.steps += 1
+        return (self.pull(n_arm1), self.pull(n_arm1))
 
     def soft_reset(self):
         """

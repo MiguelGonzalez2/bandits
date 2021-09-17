@@ -13,7 +13,7 @@ def new_average(old_average, new_value, value_count):
     """
     return 1/(value_count) * ((value_count-1)*old_average + new_value)
 
-class MABMetrics():
+class Metrics():
 
     def __init__(self, n_epochs):
         self.n_epochs = n_epochs

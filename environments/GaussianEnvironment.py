@@ -2,10 +2,10 @@
 Gaussian Arms Environment.
 """
 
-from .MABEnvironment import MABEnvironment
+from .Environment import Environment
 import numpy as np
 
-class GaussianEnvironment(MABEnvironment):
+class GaussianEnvironment(Environment):
 
     def pull(self, n_arm):
         """

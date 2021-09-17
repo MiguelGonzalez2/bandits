@@ -1,16 +1,14 @@
 """
-MABSimulation Environment
+Simulation Environment
 """
 
-# TODO work on plot labels
-
-import MABMetrics as mm
-from agents import EpsilonGreedyAgent, UCBAgent, EXP3Agent
-from environments import GaussianEnvironment
+import Metrics as mm
+from agents import EpsilonGreedyAgent, UCBAgent, EXP3Agent, ThompsonBetaAgent, ThompsonGaussianAgent
+from environments import GaussianEnvironment, BernoulliEnvironment
 import matplotlib.pyplot as plt
 
-class MABSimulation():
-    """Class that carries MAB simulations""" 
+class Simulation():
+    """Class that carries MAB and DB simulations""" 
 
     def __init__(self, agents, environment, n_epochs, n_repeats=1):
         """
@@ -22,7 +20,7 @@ class MABSimulation():
         self.agents = agents
         self.environment = environment
         self.n_epochs = n_epochs
-        self.metrics = [mm.MABMetrics(n_epochs) for i in range(len(agents))]
+        self.metrics = [mm.Metrics(n_epochs) for i in range(len(agents))]
         self.n_repeats = n_repeats
 
     def run(self):
@@ -67,8 +65,12 @@ agent1 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.1)
 agent2 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0)
 agent3 = UCBAgent.UCBAgent(n_arms)
 agent4 = EXP3Agent.EXP3Agent(n_arms, exploration_rate=EXP3Agent.EXP3Gamma(3, n_iterations, n_arms))
-environment = GaussianEnvironment.GaussianEnvironment(n_arms)
-sim = MABSimulation([agent1, agent2, agent3, agent4], environment, n_iterations, n_simulations)
+agent5 = ThompsonBetaAgent.ThompsonBetaAgent(n_arms)
+agent6 = ThompsonGaussianAgent.ThompsonGaussianAgent(n_arms)
+#environment = GaussianEnvironment.GaussianEnvironment(n_arms)
+environment = BernoulliEnvironment.BernoulliEnvironment(n_arms)
+sim = Simulation([agent1, agent2, agent3, agent4, agent5, agent6], environment, n_iterations, n_simulations)
 sim.run()
+sim.plot_metrics('regret')
 sim.plot_metrics('reward')
 

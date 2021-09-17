@@ -17,6 +17,7 @@ class MABAgent():
         self.times_explored = np.zeros(n_arms)
         self.steps = 0
         self.n_arms = n_arms
+        self.is_dueling = False # Used when comparing DBs and MABs in the same simulation
 
     def reward(self, n_arm, reward):
         """Updates the knowledge given the reward"""
