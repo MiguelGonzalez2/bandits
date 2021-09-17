@@ -34,7 +34,7 @@ class Environment():
         self.steps += 1
         return self.pull(n_arm)
 
-    def pairwise_step(self, n_arm1, n_arm2):
+    def dueling_step(self, n_arm1, n_arm2):
         """
         Returns rewards for a pair of arms, updating internal values.
         This is used for Dueling Bandits steps. Note that the actual

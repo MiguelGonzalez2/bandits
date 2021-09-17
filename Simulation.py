@@ -35,14 +35,26 @@ class Simulation():
 
                 # Carry one experiment
                 for i in range(self.n_epochs):
-                    # Ask the agent for an action
-                    arm = agent.step()
-                    # Get reward
-                    reward = self.environment.step(arm)
-                    # Feed agent
-                    agent.reward(arm, reward)
-                    # Update metrics
-                    self.metrics[agent_id].update(i, reward, optimal_value)
+                    # MAB's case:
+                    if not agent.is_dueling:
+                        # Ask the agent for an action
+                        arm = agent.step()
+                        # Get reward
+                        reward = self.environment.step(arm)
+                        # Feed agent
+                        agent.reward(arm, reward)
+                        # Update metrics
+                        self.metrics[agent_id].update(i, reward, optimal_value)
+                    # DB's case:
+                    else:
+                        # Ask the agent for an action
+                        arm1, arm2 = agent.step()
+                        # Get rewards in order to compare
+                        reward1, reward2 = self.environment.dueling_step(arm1, arm2)
+                        # Feed agent with the result of the comparison only
+                        agent.reward(arm1, arm2, reward1 > reward2)
+                        # Update metrics
+                        self.metrics[agent_id].update(i, reward1, reward2, optimal_value)
                 
                 self.environment.soft_reset()
                 self.metrics[agent_id].new_iteration()
@@ -59,8 +71,8 @@ class Simulation():
 
 ### Test
 n_arms = 10
-n_iterations = 2000
-n_simulations = 2000
+n_iterations = 100
+n_simulations = 100
 agent1 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.1)
 agent2 = EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0)
 agent3 = UCBAgent.UCBAgent(n_arms)
