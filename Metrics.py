@@ -44,7 +44,7 @@ class Metrics():
         self.value_counts[epoch] += 1
         n_values = self.value_counts[epoch]
         
-        # Get the worst reward in reward1
+        # Get the worst reward in reward 1
         if reward1 > reward2:
             reward1, reward2 = reward2, reward1
 

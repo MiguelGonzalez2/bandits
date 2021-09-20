@@ -15,7 +15,6 @@ class MABAgent():
         self.averages = np.array([optimism if optimism else np.NINF] * n_arms)
         self.optimism = optimism
         self.times_explored = np.zeros(n_arms)
-        self.steps = 0
         self.n_arms = n_arms
         self.is_dueling = False # Used when comparing DBs and MABs in the same simulation
 

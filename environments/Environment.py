@@ -46,7 +46,7 @@ class Environment():
         self.pulls[n_arm1] += 1
         self.pulls[n_arm2] += 1
         self.steps += 1
-        return (self.pull(n_arm1), self.pull(n_arm1))
+        return (self.pull(n_arm1), self.pull(n_arm2))
 
     def soft_reset(self):
         """
