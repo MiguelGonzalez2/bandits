@@ -41,7 +41,10 @@ class DBAgent():
         wins1 = self.outcomes[n_arm_1, n_arm_2]
         wins2 = self.outcomes[n_arm_2, n_arm_1]
 
-        return wins1 / (wins1 + wins2)
+        if wins1 + wins2 > 0:
+            return wins1 / (wins1 + wins2)
+        else:
+            return 1/2
 
     def get_comparison_count(self, n_arm_1, n_arm_2):
         """
@@ -54,6 +57,6 @@ class DBAgent():
         Returns the total comparison count.
         """
         return np.sum(self.outcomes)
-        
+
     def get_name(self):
         return "Default DB"

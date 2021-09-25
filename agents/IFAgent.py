@@ -55,6 +55,7 @@ class IFAgent(DBAgent):
         soft_losers = [] # Candidates that are worse, but not confidently
         hard_losers = [] # Candidates that are worse confidently
         winner = None # Candidate that is better, confidently.
+        winner_odds = -1 # Win rate of the current winner
 
         for candidate in self.candidates:
 
@@ -62,7 +63,7 @@ class IFAgent(DBAgent):
             prob = self.get_ratio(candidate, self.leader)
 
             # Size of the confidence interval for this match
-            conf = np.sqrt(4*np.log(1/self.delta)/self.get_total_comparison_count())
+            conf = np.sqrt(np.log(1/self.delta)/self.get_comparison_count(candidate, self.leader))
 
             # If the leader confidently beats the candidate, remove it
             if prob + conf < 1/2:
@@ -73,8 +74,9 @@ class IFAgent(DBAgent):
                 soft_losers.append(candidate)
 
             # If candidate confidently beats the leader, mark it as winner.
-            if winner == None and prob - conf > 1/2:
+            if prob > winner_odds and prob - conf > 1/2:
                 winner = candidate
+                winner_odds = prob
 
         # Remove confident losers
         self.candidates = list(set(self.candidates) - set(hard_losers))
