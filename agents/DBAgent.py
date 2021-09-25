@@ -49,5 +49,11 @@ class DBAgent():
         """
         return self.outcomes[n_arm_1, n_arm_2] + self.outcomes[n_arm_2, n_arm_1]
 
+    def get_total_comparison_count(self):
+        """
+        Returns the total comparison count.
+        """
+        return np.sum(self.outcomes)
+        
     def get_name(self):
         return "Default DB"

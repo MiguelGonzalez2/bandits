@@ -62,7 +62,7 @@ class IFAgent(DBAgent):
             prob = self.get_ratio(candidate, self.leader)
 
             # Size of the confidence interval for this match
-            conf = np.sqrt(4*np.log(1/self.delta)/self.get_comparison_count(candidate, self.leader))
+            conf = np.sqrt(4*np.log(1/self.delta)/self.get_total_comparison_count())
 
             # If the leader confidently beats the candidate, remove it
             if prob + conf < 1/2:

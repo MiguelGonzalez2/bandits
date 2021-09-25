@@ -67,3 +67,11 @@ class Environment():
 
     def get_optimal_value(self):
         return np.max(self.arms)
+
+    def get_probability_dueling(self, arm1, arm2):
+        """
+        Receives two arms and returns the probability that arm1 >= arm2.
+        This should be overriden depending on the "pull" function, to match
+        the distribution. 
+        """
+        return arm1 / (arm1 + arm2)
