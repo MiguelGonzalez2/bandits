@@ -41,7 +41,6 @@ class BTMAgent(DBAgent):
         """
         Updates the knowledge given the reward. Since it's a Dueling Bandit, the reward
         is a boolean indicating whether the first arm wins or not.
-        In Interleaved Filter, it updates the estimates and confidence intervals.
         """
         # If winner was already selected no need to update
         if len(self.working_set) == 1 or self.steps >= self.horizon:

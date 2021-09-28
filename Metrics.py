@@ -54,9 +54,9 @@ class Metrics():
             reward1, reward2 = reward2, reward1
             arm1, arm2 = arm2, arm1
 
-        # This should not matter for Dueling Bandits, however, we update it to the best reward
-        # for consistency.
-        self.rewards[epoch] = new_average(self.rewards[epoch], reward2, n_values)
+        # We consider the reward the average of the rewards of each individual choice.
+        # This will punish bad user experiences due to presenting poor results.
+        self.rewards[epoch] = new_average(self.rewards[epoch], (reward1 + reward2) / 2, n_values)
 
         # Get the probability that optimal arm beats each arm. (We only need displacement from 1/2) 
         prob1 = environment.get_probability_dueling(optimal_arm, arm1) - 1/2

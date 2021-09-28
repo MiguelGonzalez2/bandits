@@ -2,8 +2,16 @@
 Simulation Environment
 """
 
+from agents.MultiSBMAgent import MultiSBMAgent
 import Metrics as mm
-from agents import EpsilonGreedyAgent, UCBAgent, EXP3Agent, ThompsonBetaAgent, ThompsonGaussianAgent, IFAgent, BTMAgent
+from agents.EpsilonGreedyAgent import EpsilonGreedyAgent
+from agents.UCBAgent import UCBAgent
+from agents.EXP3Agent import EXP3Agent, EXP3Gamma
+from agents.ThompsonBetaAgent import ThompsonBetaAgent
+from agents.IFAgent import IFAgent
+from agents.BTMAgent import BTMAgent
+from agents.DoublerAgent import DoublerAgent
+from agents.SparringAgent import SparringAgent
 from environments import GaussianEnvironment, BernoulliEnvironment
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,20 +83,28 @@ class Simulation():
 
 ### Test
 n_arms = 10
-n_iterations = 4000
-n_simulations = 200
+n_iterations = 2000
+n_simulations = 100
 agents = []
-agents.append(EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0.1))
-agents.append(EpsilonGreedyAgent.EpsilonGreedyAgent(n_arms,0))
-agents.append(UCBAgent.UCBAgent(n_arms))
-agents.append(EXP3Agent.EXP3Agent(n_arms, exploration_rate=EXP3Agent.EXP3Gamma(3, n_iterations, n_arms)))
-agents.append(ThompsonBetaAgent.ThompsonBetaAgent(n_arms))
-agents.append(IFAgent.IFAgent(n_arms, n_iterations*0.9))
-agents.append(BTMAgent.BTMAgent(n_arms, n_iterations*0.9, 1))
+agents.append(EpsilonGreedyAgent(n_arms,0.1))
+agents.append(EpsilonGreedyAgent(n_arms,0))
+agents.append(UCBAgent(n_arms))
+agents.append(EXP3Agent(n_arms, exploration_rate=EXP3Gamma(3, n_iterations, n_arms)))
+agents.append(ThompsonBetaAgent(n_arms))
+agents.append(IFAgent(n_arms, n_iterations*0.9))
+agents.append(BTMAgent(n_arms, n_iterations*0.9, 1))
 #environment = BernoulliEnvironment.BernoulliEnvironment(n_arms)
 environment = GaussianEnvironment.GaussianEnvironment(n_arms)
 
-sim = Simulation(agents, environment, n_iterations, n_simulations)
+reductors = []
+reductors.append(IFAgent(n_arms, n_iterations*0.8))
+reductors.append(DoublerAgent(n_arms, UCBAgent(n_arms)))
+reductors.append(MultiSBMAgent(n_arms, UCBAgent, [n_arms]))
+reductors.append(SparringAgent(n_arms, UCBAgent(n_arms), UCBAgent(n_arms)))
+#reductors.append(DoublerAgent(n_arms, ThompsonBetaAgent(n_arms)))
+#reductors.append(MultiSBMAgent(n_arms, ThompsonBetaAgent, [n_arms]))
+reductors.append(SparringAgent(n_arms, ThompsonBetaAgent(n_arms), ThompsonBetaAgent(n_arms)))
+sim = Simulation(reductors, environment, n_iterations, n_simulations)
 sim.run()
 sim.plot_metrics('optimal_percent')
 sim.plot_metrics('regret')
