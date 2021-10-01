@@ -49,4 +49,4 @@ class EXP3Agent(MABAgent):
 
 
     def get_name(self):
-        return f"EXP3, gamma={self.exprate}, opt={self.optimism}"
+        return f"EXP3, gamma={self.exprate}"

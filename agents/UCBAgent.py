@@ -37,4 +37,4 @@ class UCBAgent(MABAgent):
 
 
     def get_name(self):
-        return f"UCB, c={self.exprate}, opt={self.optimism}"
+        return f"UCB, c={self.exprate}"

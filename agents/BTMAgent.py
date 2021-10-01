@@ -74,7 +74,9 @@ class BTMAgent(DBAgent):
         # Update working set removing the loser, if any
         if worst_prob + conf <= best_prob - conf:
             
-            loser = np.random.choice(np.flatnonzero(self.probs == worst_prob))
+            losers_all = np.flatnonzero(self.probs == worst_prob)
+            losers = np.setdiff1d(losers_all, np.setdiff1d(losers_all, self.working_set)) # Only Working Set
+            loser = np.random.choice(losers)
 
             # Remove every comparison and win towards the loser (i.e, raise the mean)
             self.wins[:,loser] = np.zeros(self.n_arms)
@@ -102,11 +104,12 @@ class BTMAgent(DBAgent):
 
         # Otherwise, we select the arms according to BTM
 
-        # Get the less compared arm with random tie breaking
+        # Get the less compared arm from working set, with random tie breaking
         comps_per_arm = np.sum(self.comparisons,axis=1)
-        comps_per_arm_ws = np.array([comps_per_arm[i] if i in self.working_set else np.Inf for i in range(self.n_arms)])
-
-        arm1 = np.random.choice(np.flatnonzero(comps_per_arm_ws == comps_per_arm_ws.min()))
+        comps_min = np.min(comps_per_arm[self.working_set])
+        least_comps_all = np.flatnonzero(comps_per_arm == comps_min) # Might contain indices not in WS
+        least_comps = np.setdiff1d(least_comps_all, np.setdiff1d(least_comps_all, self.working_set)) # Ensure WS
+        arm1 = np.random.choice(least_comps)
         # Choose another arm at random
         arm2 = np.random.choice(self.working_set)
 

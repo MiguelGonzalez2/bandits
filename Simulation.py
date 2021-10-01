@@ -97,7 +97,8 @@ agents.append(BTMAgent(n_arms, n_iterations*0.9, 1))
 environment = GaussianEnvironment.GaussianEnvironment(n_arms)
 
 reductors = []
-reductors.append(IFAgent(n_arms, n_iterations*0.8))
+reductors.append(IFAgent(n_arms, n_iterations*0.2))
+reductors.append(BTMAgent(n_arms, n_iterations*0.2))
 reductors.append(DoublerAgent(n_arms, UCBAgent(n_arms)))
 reductors.append(MultiSBMAgent(n_arms, UCBAgent, [n_arms]))
 reductors.append(SparringAgent(n_arms, UCBAgent(n_arms), UCBAgent(n_arms)))

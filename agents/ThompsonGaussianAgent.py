@@ -82,4 +82,4 @@ class ThompsonGaussianAgent(MABAgent):
         
 
     def get_name(self):
-        return f"Thompson Sampling MAB using Normal prior w/params=({self.avg_zero},{self.k_zero},{self.sigma_zero},{self.nu_zero}) opt={self.optimism}"
+        return f"Thompson Sampling MAB using Normal prior w/params=({self.avg_zero},{self.k_zero},{self.sigma_zero},{self.nu_zero})"

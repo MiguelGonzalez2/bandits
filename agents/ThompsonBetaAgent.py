@@ -52,4 +52,4 @@ class ThompsonBetaAgent(MABAgent):
         
 
     def get_name(self):
-        return f"Thompson Sampling MAB using Beta prior w/alpha={self.alpha}, beta={self.beta}, opt={self.optimism}"
+        return f"Thompson Sampling MAB using Beta prior w/alpha={self.alpha}, beta={self.beta}"

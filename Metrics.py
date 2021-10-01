@@ -63,7 +63,7 @@ class Metrics():
         prob2 = environment.get_probability_dueling(optimal_arm, arm2) - 1/2
 
         # Update regrets
-        self.sum_rewards += reward2 # We choose the supposedly better reward here.
+        self.sum_rewards += (reward1 + reward2) / 2
         self.sum_weak_rewards += prob2
         self.sum_strong_rewards += prob1
 

@@ -26,4 +26,4 @@ class EpsilonGreedyAgent(MABAgent):
         
 
     def get_name(self):
-        return f"Epsilon-Greedy MAB w/e={self.epsilon}, opt={self.optimism}"
+        return f"Epsilon-Greedy MAB w/e={self.epsilon}"
