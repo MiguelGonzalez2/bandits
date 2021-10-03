@@ -12,9 +12,10 @@ from agents.IFAgent import IFAgent
 from agents.BTMAgent import BTMAgent
 from agents.DoublerAgent import DoublerAgent
 from agents.SparringAgent import SparringAgent
+from agents.DTSAgent import DTSAgent
 from environments import GaussianEnvironment, BernoulliEnvironment
 import matplotlib.pyplot as plt
-import numpy as np
+import random
 
 class Simulation():
     """Class that carries MAB and DB simulations""" 
@@ -61,8 +62,8 @@ class Simulation():
                         arm1, arm2 = agent.step()
                         # Get rewards in order to compare
                         reward1, reward2 = self.environment.dueling_step(arm1, arm2)
-                        # Feed agent with the result of the comparison only
-                        agent.reward(arm1, arm2, reward1 > reward2)
+                        # Feed agent with the result of the comparison only. Ties are broken randomly
+                        agent.reward(arm1, arm2, reward1 > reward2 if reward1 != reward2 else random.choice([True, False]))
                         # Update metrics
                         self.metrics[agent_id].update_dueling(i, self.environment, arm1, arm2, reward1, reward2, optimal_arm, optimal_value)
                 
@@ -83,7 +84,7 @@ class Simulation():
 
 ### Test
 n_arms = 10
-n_iterations = 2000
+n_iterations = 4000
 n_simulations = 100
 agents = []
 agents.append(EpsilonGreedyAgent(n_arms,0.1))
@@ -105,6 +106,7 @@ reductors.append(SparringAgent(n_arms, UCBAgent(n_arms), UCBAgent(n_arms)))
 #reductors.append(DoublerAgent(n_arms, ThompsonBetaAgent(n_arms)))
 #reductors.append(MultiSBMAgent(n_arms, ThompsonBetaAgent, [n_arms]))
 reductors.append(SparringAgent(n_arms, ThompsonBetaAgent(n_arms), ThompsonBetaAgent(n_arms)))
+reductors.append(DTSAgent(n_arms))
 sim = Simulation(reductors, environment, n_iterations, n_simulations)
 sim.run()
 sim.plot_metrics('optimal_percent')
