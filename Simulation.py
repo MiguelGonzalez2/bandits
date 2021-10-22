@@ -13,7 +13,7 @@ from agents.BTMAgent import BTMAgent
 from agents.DoublerAgent import DoublerAgent
 from agents.SparringAgent import SparringAgent
 from agents.DTSAgent import DTSAgent
-from environments import GaussianEnvironment, BernoulliEnvironment
+from environments import GaussianEnvironment, BernoulliEnvironment, CyclicRPSEnvironment
 import matplotlib.pyplot as plt
 import random
 
@@ -84,7 +84,7 @@ class Simulation():
 
 ### Test
 n_arms = 10
-n_iterations = 4000
+n_iterations = 400
 n_simulations = 100
 agents = []
 agents.append(EpsilonGreedyAgent(n_arms,0.1))
@@ -96,6 +96,7 @@ agents.append(IFAgent(n_arms, n_iterations*0.9))
 agents.append(BTMAgent(n_arms, n_iterations*0.9, 1))
 #environment = BernoulliEnvironment.BernoulliEnvironment(n_arms)
 environment = GaussianEnvironment.GaussianEnvironment(n_arms)
+#environment = CyclicRPSEnvironment.CyclicRPSEnvironment(n_arms)
 
 reductors = []
 reductors.append(IFAgent(n_arms, n_iterations*0.2))
