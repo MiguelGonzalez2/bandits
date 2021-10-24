@@ -22,23 +22,27 @@ class Metrics():
         self.n_epochs = n_epochs
 
         # Average reward obtained, only used for MABs
-        self.rewards = np.empty(n_epochs)
+        self.rewards = np.zeros(n_epochs)
 
         # In the case of dueling bandits, strong regret measures
         # the worst "classical" regret out of the two dueling bandits,
         # and weak regret measures the best "classical" regret.
         # In the case of MABs they will match to the actual regret.
-        self.regrets = np.empty(n_epochs)
-        self.strong_regrets = np.empty(n_epochs) 
-        self.weak_regrets = np.empty(n_epochs)
+        self.regrets = np.zeros(n_epochs)
+        self.strong_regrets = np.zeros(n_epochs) 
+        self.weak_regrets = np.zeros(n_epochs)
+
+        # Copeland regret for non-condorcet situations
+        self.copeland_regrets = np.zeros(n_epochs)
 
         # Times that the strategy chose the optimal reward
-        self.chose_optimal = np.empty(n_epochs)
+        self.chose_optimal = np.zeros(n_epochs)
 
         self.value_counts = np.zeros(n_epochs)
         self.sum_rewards = 0
         self.sum_weak_rewards = 0 
         self.sum_strong_rewards = 0 
+        self.sum_copeland_rewards = 0
 
     def update_dueling(self, epoch, environment, arm1, arm2, reward1, reward2, optimal_arm, optimal_reward):
         """
@@ -62,10 +66,15 @@ class Metrics():
         prob1 = environment.get_probability_dueling(optimal_arm, arm1) - 1/2
         prob2 = environment.get_probability_dueling(optimal_arm, arm2) - 1/2
 
+        # Get the copeland individual regret (similar to before, but compare against copeland winners)
+        cop_score1 = environment.get_copeland_regret(arm1)
+        cop_score2 = environment.get_copeland_regret(arm2)
+
         # Update regrets
         self.sum_rewards += (reward1 + reward2) / 2
         self.sum_weak_rewards += prob2
         self.sum_strong_rewards += prob1
+        self.sum_copeland_rewards += (cop_score1 + cop_score2) / 2
 
         # Standard MAB regret
         new_regret = (epoch+1)*optimal_reward - self.sum_rewards
@@ -76,6 +85,9 @@ class Metrics():
 
         # Strong DB regret
         self.strong_regrets[epoch] = new_average(self.strong_regrets[epoch], self.sum_strong_rewards, n_values) 
+
+        # Copeland DB regret
+        self.copeland_regrets[epoch] = new_average(self.copeland_regrets[epoch], self.sum_copeland_rewards, n_values) 
 
         # Optimal reward
         self.chose_optimal[epoch] = new_average(self.chose_optimal[epoch], int(arm2 == optimal_arm), n_values)
@@ -94,10 +106,12 @@ class Metrics():
         self.sum_rewards = 0
         self.sum_weak_rewards = 0
         self.sum_strong_rewards = 0
+        self.sum_copeland_rewards = 0
 
     def get_metrics(self):
         return {'reward': self.rewards,
                 'regret': self.regrets,
+                'copeland_regret': self.copeland_regrets,
                 'weak_regret': self.weak_regrets,
                 'strong_regret': self.strong_regrets,
                 'optimal_percent': self.chose_optimal}

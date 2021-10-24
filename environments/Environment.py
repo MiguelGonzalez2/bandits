@@ -19,6 +19,14 @@ class Environment():
         self.pulls = np.zeros(n_arms) # Individual pull values
         self.steps = 0 # Total Steps
 
+        # Copeland score of each arm. This measures how many other arms
+        # it beats, normalized so that the Condorcet Winner (if any) has score 1.
+        self.copeland_scores = np.zeros(n_arms)
+        aux = np.array(self.arms, copy=True)
+        for i in range(n_arms):
+            self.copeland_scores[np.argmax(aux)] = (n_arms-i-1) / (n_arms-1)
+            aux[np.argmax(aux)] = np.NINF
+
     def pull(self, n_arm):
         """
         Pulls a given arm and returns reward. Override in subclasses.
@@ -61,12 +69,46 @@ class Environment():
         """
         self.soft_reset()
         self.arms = np.array([self.value_generator() for i in range(self.n_arms)])
+        self.copeland_scores = np.zeros(self.n_arms)
+        aux = np.array(self.arms, copy=True)
+        for i in range(self.n_arms):
+            self.copeland_scores[np.argmax(aux)] = (self.n_arms-i-1) / (self.n_arms-1)
+            aux[np.argmax(aux)] = np.NINF
 
     def get_optimal(self):
+        """
+        Returns the index of the best arm in the environment.
+        """
         return np.argmax(self.arms)
 
     def get_optimal_value(self):
+        """
+        Returns the best value of the environment.
+        """
         return np.max(self.arms)
+
+    def get_copeland_winners(self):
+        """
+        Returns a numpy array with the arms with highest copeland score.
+        """
+        return np.flatnonzero(self.copeland_scores == self.copeland_scores.max())
+
+    def get_copeland_regret(self, arm):
+        """
+        Returns the copeland individual arm regret.
+        """
+        winners = self.get_copeland_winners()
+
+        if arm in winners:
+            # No regret if it's one of the winners
+            return 0
+
+        max = np.NINF
+        for winner in winners:
+            delta = self.get_probability_dueling(winner, arm) - 1/2
+            if delta > max:
+                max = delta
+        return max
 
     def get_probability_dueling(self, arm1, arm2):
         """

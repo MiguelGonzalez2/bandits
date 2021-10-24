@@ -16,6 +16,7 @@ from agents.DTSAgent import DTSAgent
 from environments import GaussianEnvironment, BernoulliEnvironment, CyclicRPSEnvironment
 import matplotlib.pyplot as plt
 import random
+from tqdm import tqdm
 
 class Simulation():
     """Class that carries MAB and DB simulations""" 
@@ -36,7 +37,7 @@ class Simulation():
     def run(self):
 
         # Loops through the several environments
-        for iteration in range(self.n_repeats):
+        for iteration in tqdm(range(self.n_repeats)):
 
             optimal_arm = self.environment.get_optimal()
             optimal_value = self.environment.get_optimal_value()
@@ -83,8 +84,8 @@ class Simulation():
         plt.show()
 
 ### Test
-n_arms = 10
-n_iterations = 400
+n_arms = 20
+n_iterations = 50000
 n_simulations = 100
 agents = []
 agents.append(EpsilonGreedyAgent(n_arms,0.1))
@@ -92,15 +93,15 @@ agents.append(EpsilonGreedyAgent(n_arms,0))
 agents.append(UCBAgent(n_arms))
 agents.append(EXP3Agent(n_arms, exploration_rate=EXP3Gamma(3, n_iterations, n_arms)))
 agents.append(ThompsonBetaAgent(n_arms))
-agents.append(IFAgent(n_arms, n_iterations*0.9))
-agents.append(BTMAgent(n_arms, n_iterations*0.9, 1))
+agents.append(IFAgent(n_arms, n_iterations*0.8))
+agents.append(BTMAgent(n_arms, n_iterations*0.8, 1))
 #environment = BernoulliEnvironment.BernoulliEnvironment(n_arms)
-environment = GaussianEnvironment.GaussianEnvironment(n_arms)
-#environment = CyclicRPSEnvironment.CyclicRPSEnvironment(n_arms)
+# environment = GaussianEnvironment.GaussianEnvironment(n_arms)
+environment = CyclicRPSEnvironment.CyclicRPSEnvironment(n_arms, std=0.2)
 
 reductors = []
-reductors.append(IFAgent(n_arms, n_iterations*0.2))
-reductors.append(BTMAgent(n_arms, n_iterations*0.2))
+reductors.append(IFAgent(n_arms, n_iterations*0.8))
+reductors.append(BTMAgent(n_arms, n_iterations*0.8))
 reductors.append(DoublerAgent(n_arms, UCBAgent(n_arms)))
 reductors.append(MultiSBMAgent(n_arms, UCBAgent, [n_arms]))
 reductors.append(SparringAgent(n_arms, UCBAgent(n_arms), UCBAgent(n_arms)))
@@ -112,6 +113,7 @@ sim = Simulation(reductors, environment, n_iterations, n_simulations)
 sim.run()
 sim.plot_metrics('optimal_percent')
 sim.plot_metrics('regret')
+sim.plot_metrics('copeland_regret')
 sim.plot_metrics('reward')
 sim.plot_metrics('weak_regret')
 sim.plot_metrics('strong_regret')
