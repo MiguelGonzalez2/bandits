@@ -2,11 +2,7 @@
 Double Thompson Sampling (DTS) Dueling Bandit Agent
 """
 
-import random
 import numpy as np
-from numpy.core.defchararray import lower, upper
-from numpy.core.fromnumeric import transpose
-from numpy.core.numeric import Inf
 from .DBAgent import DBAgent
 
 class DTSAgent(DBAgent):
@@ -48,22 +44,16 @@ class DTSAgent(DBAgent):
         # Thompson sampling
         thetas = np.empty((self.n_arms, self.n_arms)) # Estimates for each probability
 
-        for j in range(self.n_arms):
-            for i in range(j):
-                sample = np.random.beta(self.outcomes[i,j] + self.alpha, self.outcomes[j,i] + self.beta)
-                thetas[i,j] = sample
-                thetas[j,i] = 1 - sample
+        thetas = np.triu(np.random.beta(self.outcomes + self.alpha, np.transpose(self.outcomes) + self.beta), 1)
+        thetas = thetas + (1-np.transpose(thetas))
 
         # Select overall winner by updating scores using the sampled probabilities
         scores = np.where(winners, np.count_nonzero(np.logical_and(thetas > 1/2, exclude_diagonal), axis=1), np.NINF)
         arm1 = np.random.choice(np.flatnonzero(scores == scores.max()))
 
         # Update theta scores
-        for i in range(self.n_arms):
-            if i == arm1:
-                thetas[i,i] = 1/2
-            else:
-                thetas[i,arm1] = np.random.beta(self.outcomes[i,arm1] + self.alpha, self.outcomes[arm1,i] + self.beta)
+        thetas[:, arm1] = np.random.beta(self.outcomes[:,arm1] + self.alpha, self.outcomes[arm1,:] + self.beta)
+        thetas[arm1, arm1] = 1/2
 
         # Select competitor as follows: pick the best one from the "uncertain" pairs.
         uncertain_pairs = np.where(lower_bounds[:, arm1] <= 1/2, thetas[:, arm1], np.NINF)

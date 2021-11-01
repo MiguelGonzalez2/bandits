@@ -30,3 +30,6 @@ class BernoulliEnvironment(Environment):
         and arm2 = 0.
         """
         return self.arms[arm1] * (1-self.arms[arm2])
+
+    def get_name(self):
+        return f"Bernoulli arms"

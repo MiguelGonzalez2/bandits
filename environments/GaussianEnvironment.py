@@ -24,3 +24,6 @@ class GaussianEnvironment(Environment):
         For the normal distribution, is 1 - cdf((m2-m1)/sqrt(var1+var2))
         """
         return 1 - norm.cdf((self.arms[arm2] - self.arms[arm1]) / np.sqrt(2))
+
+    def get_name(self):
+        return f"Gaussian Arms"

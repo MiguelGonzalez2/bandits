@@ -113,3 +113,7 @@ class CyclicRPSEnvironment(Environment):
         The "generalized rock paper scissors" method is applied.
         """
         return self.probabilities[arm1, arm2]
+
+
+    def get_name(self):
+        return f"Noisy rock-paper-scissors arms with wp={self.winner_prob}, std={self.std}"
