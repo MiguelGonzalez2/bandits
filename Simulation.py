@@ -88,10 +88,22 @@ class Simulation():
         plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
         plt.show()
 
+    def save_metrics(self, metric_name, scale="linear"):
+        plots = []
+        plt.rcParams["figure.figsize"] = (10, 7)
+        for i in range(len(self.agents)):
+            plt.xlabel('Epoch')
+            plt.ylabel(metric_name)
+            plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
+        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))])
+        plt.xscale(scale)
+        plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
+        plt.savefig(metric_name + '.png')
+
 ### Test
 n_arms = 5
 n_iterations = 500000
-n_simulations = 100
+n_simulations = 10
 agents = []
 agents.append(EpsilonGreedyAgent(n_arms,0.1))
 agents.append(EpsilonGreedyAgent(n_arms,0))
@@ -121,9 +133,16 @@ sim = Simulation(reductors, environment, n_iterations, n_simulations)
 sim.run()
 #sim.plot_metrics('optimal_percent')
 #sim.plot_metrics('regret')
-sim.plot_metrics('copeland_regret', scale='log')
-sim.plot_metrics('copeland_regret_non_cumulative', scale='log')
+#sim.plot_metrics('copeland_regret', scale='log')
+#sim.plot_metrics('copeland_regret_non_cumulative', scale='log')
 #sim.plot_metrics('reward')
 #sim.plot_metrics('weak_regret')
 #sim.plot_metrics('strong_regret')
+sim.save_metrics('optimal_percent')
+sim.save_metrics('regret')
+sim.save_metrics('copeland_regret', scale='log')
+sim.save_metrics('copeland_regret_non_cumulative', scale='log')
+sim.save_metrics('reward')
+sim.save_metrics('weak_regret')
+sim.save_metrics('strong_regret')
 
