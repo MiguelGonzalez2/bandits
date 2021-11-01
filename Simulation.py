@@ -23,7 +23,7 @@ from tqdm import tqdm
 class Simulation():
     """Class that carries MAB and DB simulations""" 
 
-    def __init__(self, agents, environment, n_epochs, n_repeats=1, sample_frequency=1):
+    def __init__(self, agents, environment, n_epochs, n_repeats=1):
         """
         Agents: list of agents to simulate
         Environment: Environment object with the arms
@@ -36,7 +36,6 @@ class Simulation():
         self.n_epochs = n_epochs
         self.metrics = [mm.Metrics(n_epochs) for i in range(len(agents))]
         self.n_repeats = n_repeats
-        self.sample_frequency = sample_frequency
 
     def run(self):
 
@@ -60,8 +59,7 @@ class Simulation():
                         # Feed agent
                         agent.reward(arm, reward)
                         # Update metrics
-                        if i % self.sample_frequency == 0:
-                            self.metrics[agent_id].update(i, self.environment, arm, reward, optimal_arm, optimal_value)
+                        self.metrics[agent_id].update(i, self.environment, arm, reward, optimal_arm, optimal_value)
                     # DB's case:
                     else:
                         # Ask the agent for an action
@@ -71,8 +69,7 @@ class Simulation():
                         # Feed agent with the result of the comparison only. Ties are broken randomly
                         agent.reward(arm1, arm2, reward1 > reward2 if reward1 != reward2 else random.choice([True, False]))
                         # Update metrics
-                        if i % self.sample_frequency == 0:
-                            self.metrics[agent_id].update_dueling(i, self.environment, arm1, arm2, reward1, reward2, optimal_arm, optimal_value)
+                        self.metrics[agent_id].update_dueling(i, self.environment, arm1, arm2, reward1, reward2, optimal_arm, optimal_value)
                 
                 self.environment.soft_reset()
                 self.metrics[agent_id].new_iteration()
@@ -82,11 +79,10 @@ class Simulation():
 
     def plot_metrics(self, metric_name, scale="linear"):
         plots = []
-        x = range(0, self.n_epochs, self.sample_frequency)
         for i in range(len(self.agents)):
             plt.xlabel('Epoch')
             plt.ylabel(metric_name)
-            plots += plt.plot(x, self.metrics[i].get_metrics()[metric_name][x], label=self.agents[i].get_name())
+            plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
         plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))])
         plt.xscale(scale)
         plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
@@ -95,7 +91,7 @@ class Simulation():
 ### Test
 n_arms = 5
 n_iterations = 500000
-n_simulations = 50
+n_simulations = 100
 agents = []
 agents.append(EpsilonGreedyAgent(n_arms,0.1))
 agents.append(EpsilonGreedyAgent(n_arms,0))
@@ -121,7 +117,7 @@ reductors.append(SparringAgent(n_arms, ThompsonBetaAgent(n_arms), ThompsonBetaAg
 reductors.append(DTSAgent(n_arms))
 reductors.append(RUCBAgent(n_arms))
 reductors.append(CCBAgent(n_arms))
-sim = Simulation(reductors, environment, n_iterations, n_simulations, sample_frequency=1000)
+sim = Simulation(reductors, environment, n_iterations, n_simulations)
 sim.run()
 #sim.plot_metrics('optimal_percent')
 #sim.plot_metrics('regret')
