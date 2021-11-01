@@ -103,7 +103,7 @@ class Simulation():
 ### Test
 n_arms = 5
 n_iterations = 500000
-n_simulations = 10
+n_simulations = 100
 agents = []
 agents.append(EpsilonGreedyAgent(n_arms,0.1))
 agents.append(EpsilonGreedyAgent(n_arms,0))
