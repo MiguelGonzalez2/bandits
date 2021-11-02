@@ -23,6 +23,9 @@ class NoisyGaussianEnvironment(GaussianEnvironment):
         t = np.transpose(self.epsilons)
         self.epsilons = self.epsilons + -t
 
+        # Update the copeland scores
+        self.copeland_scores = np.count_nonzero(self.epsilons - self.arms + self.arms[:, np.newaxis] > 0, axis=1)/(self.n_arms-1)
+
 
     def dueling_step(self, n_arm1, n_arm2):
         """
@@ -62,6 +65,8 @@ class NoisyGaussianEnvironment(GaussianEnvironment):
         self.epsilons = np.tril(np.random.normal(loc=0, scale=self.d**2, size=(self.n_arms, self.n_arms)), k=-1)
         t = np.transpose(self.epsilons)
         self.epsilons = self.epsilons + -t
+        # Update the copeland scores
+        self.copeland_scores = np.count_nonzero(self.epsilons - self.arms + self.arms[:, np.newaxis], axis=1)/(self.n_arms-1)
 
 
     def get_name(self):

@@ -50,11 +50,7 @@ class CyclicRPSEnvironment(Environment):
                         self.probabilities[arm2, arm1] = prob
 
         # Update the copeland scores
-        for arm in range(n_arms):
-            self.copeland_scores[arm] = 0
-            for arm2 in range(n_arms):
-                if self.probabilities[arm, arm2] > 1/2:
-                    self.copeland_scores[arm] += 1/(n_arms-1)
+        self.copeland_scores = np.count_nonzero(self.probabilities > 1/2, axis=1)/(self.n_arms-1)
 
 
     def dueling_step(self, n_arm1, n_arm2):
@@ -100,11 +96,7 @@ class CyclicRPSEnvironment(Environment):
                         self.probabilities[arm2, arm1] = prob
 
         # Update the copeland scores
-        for arm in range(self.n_arms):
-            self.copeland_scores[arm] = 0
-            for arm2 in range(self.n_arms):
-                if self.probabilities[arm, arm2] > 1/2:
-                    self.copeland_scores[arm] += 1/(self.n_arms-1)
+        self.copeland_scores = np.count_nonzero(self.probabilities > 1/2, axis=1)/(self.n_arms-1)
         
 
     def get_probability_dueling(self, arm1, arm2):
