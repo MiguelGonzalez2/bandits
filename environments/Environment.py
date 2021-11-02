@@ -83,7 +83,7 @@ class Environment():
         """
         Returns the index of the best arm in the environment.
         """
-        return np.argmax(self.arms)
+        return np.argmax(self.copeland_scores)
 
     def get_optimal_value(self):
         """
