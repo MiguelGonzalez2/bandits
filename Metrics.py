@@ -72,10 +72,11 @@ class Metrics():
         cop_score2 = environment.get_copeland_regret(arm2)
 
         # Update regrets
-        self.sum_rewards += np.clip((reward1 + reward2) / 2, 0, None)
-        self.sum_weak_rewards += np.clip(prob2, 0, None)
-        self.sum_strong_rewards += np.clip(prob1, 0, None)
-        self.sum_copeland_rewards += np.clip((cop_score1 + cop_score2) / 2, 0, None)
+        self.sum_rewards += (reward1 + reward2) / 2
+        self.sum_weak_rewards += prob2
+        self.sum_strong_rewards += prob1
+        copeland_regret = (cop_score1 + cop_score2) / 2
+        self.sum_copeland_rewards += copeland_regret if copeland_regret > 0 else 0
 
         # Standard MAB regret
         new_regret = (epoch+1)*optimal_reward - self.sum_rewards
@@ -89,7 +90,7 @@ class Metrics():
 
         # Copeland DB regret
         self.copeland_regrets[epoch] = new_average(self.copeland_regrets[epoch], self.sum_copeland_rewards, n_values) 
-        self.copeland_regrets_non_cumulative[epoch] = new_average(self.copeland_regrets_non_cumulative[epoch], (cop_score1 + cop_score2) / 2, n_values)
+        self.copeland_regrets_non_cumulative[epoch] = new_average(self.copeland_regrets_non_cumulative[epoch], copeland_regret, n_values)
 
         # Optimal reward
         self.chose_optimal[epoch] = new_average(self.chose_optimal[epoch], int(arm2 == optimal_arm), n_values)
