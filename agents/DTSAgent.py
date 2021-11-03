@@ -36,9 +36,7 @@ class DTSAgent(DBAgent):
         np.fill_diagonal(lower_bounds, 1/2)
         
         # Copeland scores to discard losers
-        exclude_diagonal = np.full((self.n_arms, self.n_arms), True)
-        np.fill_diagonal(exclude_diagonal, False)
-        scores = np.count_nonzero(np.logical_and(upper_bounds > 1/2, exclude_diagonal), axis=1)
+        scores = np.count_nonzero(upper_bounds > 1/2, axis=1)
         winners = (scores == scores.max())
 
         # Thompson sampling
@@ -48,7 +46,7 @@ class DTSAgent(DBAgent):
         thetas = thetas + (1-np.transpose(thetas))
 
         # Select overall winner by updating scores using the sampled probabilities
-        scores = np.where(winners, np.count_nonzero(np.logical_and(thetas > 1/2, exclude_diagonal), axis=1), np.NINF)
+        scores = np.where(winners, np.count_nonzero(thetas > 1/2, axis=1), np.NINF)
         arm1 = np.random.choice(np.flatnonzero(scores == scores.max()))
 
         # Update theta scores
