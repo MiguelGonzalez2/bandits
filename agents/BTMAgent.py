@@ -75,7 +75,7 @@ class BTMAgent(DBAgent):
         if worst_prob + conf <= best_prob - conf:
             
             losers_all = np.flatnonzero(self.probs == worst_prob)
-            losers = np.setdiff1d(losers_all, np.setdiff1d(losers_all, self.working_set)) # Only Working Set
+            losers = losers_all[np.in1d(losers_all, self.working_set, assume_unique=True)] # Only Working Set
             loser = np.random.choice(losers)
 
             # Remove every comparison and win towards the loser (i.e, raise the mean)
@@ -108,7 +108,7 @@ class BTMAgent(DBAgent):
         comps_per_arm = np.sum(self.comparisons,axis=1)
         comps_min = np.min(comps_per_arm[self.working_set])
         least_comps_all = np.flatnonzero(comps_per_arm == comps_min) # Might contain indices not in WS
-        least_comps = np.setdiff1d(least_comps_all, np.setdiff1d(least_comps_all, self.working_set)) # Ensure WS
+        least_comps = least_comps_all[np.in1d(least_comps_all, self.working_set, assume_unique=True)] # Ensure WS
         arm1 = np.random.choice(least_comps)
         # Choose another arm at random
         arm2 = np.random.choice(self.working_set)
