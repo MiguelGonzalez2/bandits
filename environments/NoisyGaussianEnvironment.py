@@ -66,7 +66,7 @@ class NoisyGaussianEnvironment(GaussianEnvironment):
         t = np.transpose(self.epsilons)
         self.epsilons = self.epsilons + -t
         # Update the copeland scores
-        self.copeland_scores = np.count_nonzero(self.epsilons - self.arms + self.arms[:, np.newaxis], axis=1)/(self.n_arms-1)
+        self.copeland_scores = np.count_nonzero(self.epsilons - self.arms + self.arms[:, np.newaxis] > 0, axis=1)/(self.n_arms-1)
 
 
     def get_name(self):
