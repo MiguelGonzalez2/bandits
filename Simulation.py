@@ -99,11 +99,12 @@ class Simulation():
         plt.xscale(scale)
         plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
         plt.savefig(metric_name + '.png')
+        plt.clf()
 
 ### Test
-n_arms = 5
-n_iterations = 500000
-n_simulations = 100
+n_arms = 20
+n_iterations = 100000
+n_simulations = 250
 agents = []
 agents.append(EpsilonGreedyAgent(n_arms,0.1))
 agents.append(EpsilonGreedyAgent(n_arms,0))
@@ -113,18 +114,18 @@ agents.append(ThompsonBetaAgent(n_arms))
 agents.append(IFAgent(n_arms, n_iterations*0.8))
 agents.append(BTMAgent(n_arms, n_iterations*0.8, 1))
 # environment = BernoulliEnvironment.BernoulliEnvironment(n_arms)
-# environment = GaussianEnvironment.GaussianEnvironment(n_arms)
-#environment = CyclicRPSEnvironment.CyclicRPSEnvironment(n_arms, std=0.2)
-environment = NoisyGaussianEnvironment.NoisyGaussianEnvironment(n_arms, d=1)
+environment = GaussianEnvironment.GaussianEnvironment(n_arms)
+#environment = CyclicRPSEnvironment.CyclicRPSEnvironment(n_arms, std=0.5)
+#environment = NoisyGaussianEnvironment.NoisyGaussianEnvironment(n_arms, d=0.5)
 
 reductors = []
-#reductors.append(IFAgent(n_arms, n_iterations))
+reductors.append(IFAgent(n_arms, n_iterations))
 reductors.append(BTMAgent(n_arms, n_iterations))
 #reductors.append(DoublerAgent(n_arms, UCBAgent(n_arms)))
 #reductors.append(MultiSBMAgent(n_arms, UCBAgent, [n_arms]))
 #reductors.append(SparringAgent(n_arms, UCBAgent(n_arms), UCBAgent(n_arms)))
-#reductors.append(DoublerAgent(n_arms, ThompsonBetaAgent(n_arms)))
-#reductors.append(MultiSBMAgent(n_arms, ThompsonBetaAgent, [n_arms]))
+reductors.append(DoublerAgent(n_arms, ThompsonBetaAgent(n_arms)))
+reductors.append(MultiSBMAgent(n_arms, ThompsonBetaAgent, [n_arms]))
 reductors.append(SparringAgent(n_arms, ThompsonBetaAgent(n_arms), ThompsonBetaAgent(n_arms)))
 reductors.append(DTSAgent(n_arms))
 reductors.append(RUCBAgent(n_arms))
@@ -132,13 +133,15 @@ reductors.append(CCBAgent(n_arms))
 sim = Simulation(reductors, environment, n_iterations, n_simulations)
 sim.run()
 """
-sim.plot_metrics('optimal_percent')
-sim.plot_metrics('regret')
+#sim.plot_metrics('optimal_percent')
+#sim.plot_metrics('regret')
 sim.plot_metrics('copeland_regret')
 sim.plot_metrics('copeland_regret_non_cumulative')
-sim.plot_metrics('reward')
-sim.plot_metrics('weak_regret')
-sim.plot_metrics('strong_regret')
+sim.plot_metrics('copeland_regret', scale="log")
+sim.plot_metrics('copeland_regret_non_cumulative', scale="log")
+#sim.plot_metrics('reward')
+#sim.plot_metrics('weak_regret')
+#sim.plot_metrics('strong_regret')
 """
 sim.save_metrics('optimal_percent')
 sim.save_metrics('regret')

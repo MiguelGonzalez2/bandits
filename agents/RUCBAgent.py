@@ -7,7 +7,7 @@ from .DBAgent import DBAgent
 
 class RUCBAgent(DBAgent):
     
-    def __init__(self, n_arms, alpha=1):
+    def __init__(self, n_arms, alpha=0.51):
         """
         Initializes RUCB agent. 
         alpha -> "Exploration rate" similar to UCB.

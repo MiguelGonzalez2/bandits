@@ -7,7 +7,7 @@ from .DBAgent import DBAgent
 
 class CCBAgent(DBAgent):
     
-    def __init__(self, n_arms, alpha=1):
+    def __init__(self, n_arms, alpha=0.51):
         """
         Initializes CCB agent, which is the adaptation of
         RUCB to a non-condorcet setting. 
