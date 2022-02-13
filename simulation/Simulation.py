@@ -46,9 +46,10 @@ class Simulation():
     def get_experiment_by_index(self, index):
         return self.experiments.values()[index]
 
-    def run_all(self):
+    def run_all(self, save = False):
         """
         Runs every remaining experiment.
+        If save_state = True, saves after each experiment.
         """
         counter = 1
         for id, exp in self.experiments.items():
@@ -57,6 +58,10 @@ class Simulation():
             else:
                 print(f"[{counter}/{self.get_experiment_count()}] Running experiment {id}...")
                 exp.run()
+                if save:
+                    self.save_state()
+                    print(f"Saving state...")
+                    
             counter += 1
 
     def save_all_metrics(self, metric_name, scale="linear"):

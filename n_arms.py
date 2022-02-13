@@ -21,7 +21,7 @@ MAX_N_REPEATS = 200 # Maximum number of repeats
 
 ARM_VALUES = [10, 20, 30, 50, 100, 150, 200]
 
-sim = Simulation("arm number")
+sim = Simulation(f"arm number, {N_EPOCHS} epochs")
 
 for n_arms in ARM_VALUES:
     agents = []
@@ -39,8 +39,7 @@ for n_arms in ARM_VALUES:
     n_repeats = min(int(N_REPEATS * float(ARM_VALUES[-1])**2 / float(n_arms)**2), MAX_N_REPEATS)
     sim.add_experiment(Experiment(f"N = {n_arms}", agents, environ, N_EPOCHS, n_repeats, plot_position=n_arms))
 
-sim.run_all()
-sim.save_state()
+sim.run_all(save = True)
 
 sim.plot_aggregated_metrics('copeland_regret')
 sim.save_all_metrics('copeland_regret')
