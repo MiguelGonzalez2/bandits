@@ -61,7 +61,7 @@ class Simulation():
                 if save:
                     self.save_state()
                     print(f"Saving state...")
-                    
+
             counter += 1
 
     def save_all_metrics(self, metric_name, scale="linear"):
@@ -102,7 +102,7 @@ class Simulation():
         with open(self.name + ".pkl", "rb") as f:
             return pickle.load(f)
 
-    def plot_aggregated_metrics(self, metric_name):
+    def plot_aggregated_metrics(self, metric_name, padding=[1,1]):
         """
         Plots the final value of the given metric for each experiment.
         The values are plotted left to right in order of insertion.
@@ -130,7 +130,7 @@ class Simulation():
             plt.ylabel(metric_name)
             plots += plt.plot(x_values, [v[i] for v in vals], "o--", label=exp.get_agent_by_index(i).get_name())
         
-        plt.xlim([0.8, len(x_values)+0.2])
+        plt.xlim([min(x_values)-padding[0], max(x_values)+padding[1]])
         plt.xticks(x_values, labels=experiment_names)
         plt.legend()
         plt.title(f"Results of simulation \'{self.name}\' with {self.get_experiment_count()} experiments")
