@@ -16,16 +16,17 @@ class CyclicRPSEnvironment(Environment):
     cyclic distribution.
     """
 
-    def __init__(self, n_arms, value_generator = np.random.normal, winner_prob=2/3, std=0):
+    def __init__(self, n_arms, value_generator = np.random.normal, values = None, winner_prob=2/3, std=0):
         """
         Initializes the environment.
         n_arms -> Number of arms
         winner_prob -> probability that i beats j in the case that i is better than j.
         value_generator -> Generator function for each arm hidden value (true reward)
+        values -> Actual arm values. If given, value_generator is unused.
         variance -> Random noise from gaussian(0,std) is applied to every probability, then clipped
         to either [1/2,1] or [0,1/2] depending on whether it's the winner or the loser.
         """
-        super(CyclicRPSEnvironment,self).__init__(n_arms, value_generator)
+        super(CyclicRPSEnvironment,self).__init__(n_arms, value_generator, values)
         self.probabilities = np.zeros((n_arms, n_arms)) # Entry [i,j] is probability that i beats j
         self.winner_prob = winner_prob
         self.std = std

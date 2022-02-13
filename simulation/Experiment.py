@@ -2,7 +2,7 @@
 Class representing a MAB/DB experiment.
 """
 
-import Metrics as mm
+from .Metrics import Metrics as mm
 
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -17,21 +17,24 @@ class Experiment():
     repeated more than one time with distinct seeds for averaging.
     """
 
-    def __init__(self, name, agents, environment, n_epochs, n_repeats=1):
+    def __init__(self, name, agents, environment, n_epochs, n_repeats=1, plot_position = None):
             """
             Name: identifier for the experiment. Must be unique.
             Agents: list of agents to simulate
             Environment: Environment object with the arms
             n_epochs: Nº of iterations per agent on a given environment
             n_repeats: Nº of environments per agent for robustness
+            plot_position: If this experiment can be parameterized within the simulation by a cardinal value 
+            (for example, the number of arms), it should be indicated here for consistent plots.
             """
             self.name = name
             self.agents = agents
             self.environment = environment
             self.n_epochs = n_epochs
-            self.metrics = [mm.Metrics(n_epochs) for i in range(len(agents))]
+            self.metrics = [mm(n_epochs) for i in range(len(agents))]
             self.n_repeats = n_repeats
             self.ran = False
+            self.plot_position = plot_position
 
     def run(self):
         """
@@ -43,7 +46,7 @@ class Experiment():
             optimal_arm = self.environment.get_optimal()
             optimal_value = self.environment.get_optimal_value()
             self.environment.reset()
-            
+
             # Loops through the several agents
             for agent_id, agent in enumerate(self.agents):
 
@@ -127,3 +130,6 @@ class Experiment():
 
     def get_agent_by_index(self, index):
         return self.agents[index]
+
+    def get_plot_position(self):
+        return self.plot_position

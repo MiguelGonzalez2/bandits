@@ -7,14 +7,23 @@ import numpy as np
 class Environment():
     """Implements abstract MABEnvironment w/ constant output"""
 
-    def __init__(self, n_arms, value_generator = np.random.normal):
+    def __init__(self, n_arms, value_generator = np.random.normal, values = None):
         """
         Initializes the environment.
         n_arms -> Number of arms
-        value_generator -> Generator function for each arm hidden value (true reward)
+        value_generator -> Function for each arm hidden value (true reward)
+        values -> Arm values. If given, value_generator is ignored.
         """
         self.value_generator = value_generator
-        self.arms = np.array([value_generator() for i in range(n_arms)])
+        if not values:
+            self.arms = np.array([value_generator() for i in range(n_arms)])
+        else:
+            if len(values) > n_arms:
+                values = values[:n_arms]
+            elif len(values) < n_arms:
+                values += [value_generator() for i in range(n_arms - len(values))]
+            self.arms = np.array(values, dtype=float)
+
         self.n_arms = n_arms
         self.pulls = np.zeros(n_arms) # Individual pull values
         self.steps = 0 # Total Steps

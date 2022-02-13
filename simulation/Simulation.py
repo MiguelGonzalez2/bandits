@@ -2,20 +2,6 @@
 Simulation Environment
 """
 
-from agents.MultiSBMAgent import MultiSBMAgent
-from agents.EpsilonGreedyAgent import EpsilonGreedyAgent
-from agents.UCBAgent import UCBAgent
-from agents.EXP3Agent import EXP3Agent, EXP3Gamma
-from agents.ThompsonBetaAgent import ThompsonBetaAgent
-from agents.IFAgent import IFAgent
-from agents.BTMAgent import BTMAgent
-from agents.DoublerAgent import DoublerAgent
-from agents.SparringAgent import SparringAgent
-from agents.DTSAgent import DTSAgent
-from agents.RUCBAgent import RUCBAgent
-from agents.CCBAgent import CCBAgent
-from environments import GaussianEnvironment, BernoulliEnvironment, CyclicRPSEnvironment, NoisyGaussianEnvironment
-from Experiment import Experiment
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 
@@ -24,7 +10,7 @@ import pickle
 class Simulation():
     """Class that carries out MAB and DB experiments.""" 
 
-    def __init__(self, name, experiments):
+    def __init__(self, name, experiments=[]):
         """
         Name: name for the global simulation.
         Experiments: list of experiments that will be carried out.
@@ -121,15 +107,17 @@ class Simulation():
         # Collect values for each experiment.
         vals = []
         experiment_names = []
+        x_values = []
         for id, exp in self.experiments.items():
             if exp.was_run():
                 vals.append(exp.get_final_values(metric_name))
                 experiment_names.append(id)
+                xpos = exp.get_plot_position()
+                x_values.append(xpos if xpos else (max(x_values)+1 if x_values else 1))
             else:
                 print(f"Warning: experiment {id} was not run, so metric {metric_name} cannot be plotted.")
 
         num_agents = min([e.get_agent_count() for e in self.experiments.values()])
-        x_values = [i+1 for i in range(len(experiment_names))]
         plots = []
         
         for i in range(num_agents):
@@ -140,6 +128,6 @@ class Simulation():
         plt.xlim([0.8, len(x_values)+0.2])
         plt.xticks(x_values, labels=experiment_names)
         plt.legend()
-        plt.title(f"Results of simulation {self.name} with {self.get_experiment_count()} experiments")
+        plt.title(f"Results of simulation \'{self.name}\' with {self.get_experiment_count()} experiments")
         plt.show()
 

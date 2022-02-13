@@ -10,14 +10,15 @@ from scipy.stats import norm
 
 class NoisyGaussianEnvironment(GaussianEnvironment):
 
-    def __init__(self, n_arms, value_generator = np.random.normal, d=0.1):
+    def __init__(self, n_arms, value_generator = np.random.normal, values = None, d=0.1):
         """
         Initializes the environment.
         n_arms -> Number of arms
         value_generator -> Generator function for each arm hidden value (true reward)
+        values -> Actual arm values. If given, value_generator is unused.
         d -> Amount of noise added. The higher, the less transitivity.
         """
-        super(NoisyGaussianEnvironment,self).__init__(n_arms, value_generator)
+        super(NoisyGaussianEnvironment,self).__init__(n_arms, value_generator, values)
         self.d = d
         self.epsilons = np.tril(np.random.normal(loc=0, scale=d**2, size=(n_arms, n_arms)), k=-1)
         t = np.transpose(self.epsilons)
