@@ -121,3 +121,15 @@ class Metrics():
                 'weak_regret': self.weak_regrets,
                 'strong_regret': self.strong_regrets,
                 'optimal_percent': self.chose_optimal}
+
+    def get_metric(self, name):
+        """
+        Returns all epoch values for a given metric.
+        """
+        return self.get_metrics()[name]
+
+    def get_metric_result(self, name):
+        """
+        Returns the last epoch value for a given metric.
+        """
+        return self.get_metric(name)[self.n_epochs-1]

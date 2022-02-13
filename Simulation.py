@@ -3,7 +3,6 @@ Simulation Environment
 """
 
 from agents.MultiSBMAgent import MultiSBMAgent
-import Metrics as mm
 from agents.EpsilonGreedyAgent import EpsilonGreedyAgent
 from agents.UCBAgent import UCBAgent
 from agents.EXP3Agent import EXP3Agent, EXP3Gamma
@@ -16,138 +15,131 @@ from agents.DTSAgent import DTSAgent
 from agents.RUCBAgent import RUCBAgent
 from agents.CCBAgent import CCBAgent
 from environments import GaussianEnvironment, BernoulliEnvironment, CyclicRPSEnvironment, NoisyGaussianEnvironment
+from Experiment import Experiment
+from collections import OrderedDict
 import matplotlib.pyplot as plt
-import random
-from tqdm import tqdm
+
+import pickle
 
 class Simulation():
-    """Class that carries MAB and DB simulations""" 
+    """Class that carries out MAB and DB experiments.""" 
 
-    def __init__(self, agents, environment, n_epochs, n_repeats=1):
+    def __init__(self, name, experiments):
         """
-        Agents: list of agents to simulate
-        Environment: Environment object with the arms
-        n_epochs: Nº of iterations per agent on a given environment
-        n_repeats: Nº of environments per agent for robustness
-        sample_frequency: Metrics are taken after this amount of steps.
+        Name: name for the global simulation.
+        Experiments: list of experiments that will be carried out.
         """
-        self.agents = agents
-        self.environment = environment
-        self.n_epochs = n_epochs
-        self.metrics = [mm.Metrics(n_epochs) for i in range(len(agents))]
-        self.n_repeats = n_repeats
+        self.name = name
+        self.experiments = OrderedDict()
 
-    def run(self):
+        # Insert in order
+        for e in experiments:
+            self.experiments[e.get_name()] = e
 
-        # Loops through the several environments
-        for iteration in tqdm(range(self.n_repeats)):
+    def add_experiment(self, experiment, override = False):
+        """
+        Adds experiment to the simulation queue. 
+        experiment: experiment to be added.
+        override: If the experiment already exists (i.e, an experiment with
+        the same name exists), then it won't be added unless override is
+        set to true.
+        """
+        id = experiment.get_name() 
+        if id not in self.experiments or override:
+            self.experiments[id] = experiment
 
-            optimal_arm = self.environment.get_optimal()
-            optimal_value = self.environment.get_optimal_value()
+    def get_experiment_count(self):
+        return len(self.experiments)
 
-            # Loops through the several agents
-            for agent_id, agent in enumerate(self.agents):
+    def get_experiment_names(self):
+        return self.experiments.keys()
 
-                # Carry one experiment
-                for i in range(self.n_epochs):
-                    # MAB's case:
-                    if not agent.is_dueling:
-                        # Ask the agent for an action
-                        arm = agent.step()
-                        # Get reward
-                        reward = self.environment.step(arm)
-                        # Feed agent
-                        agent.reward(arm, reward)
-                        # Update metrics
-                        self.metrics[agent_id].update(i, self.environment, arm, reward, optimal_arm, optimal_value)
-                    # DB's case:
-                    else:
-                        # Ask the agent for an action
-                        arm1, arm2 = agent.step()
-                        # Get rewards in order to compare
-                        reward1, reward2 = self.environment.dueling_step(arm1, arm2)
-                        # Feed agent with the result of the comparison only. Ties are broken randomly
-                        agent.reward(arm1, arm2, reward1 > reward2 if reward1 != reward2 else random.choice([True, False]))
-                        # Update metrics
-                        self.metrics[agent_id].update_dueling(i, self.environment, arm1, arm2, reward1, reward2, optimal_arm, optimal_value)
-                
-                self.environment.soft_reset()
-                self.metrics[agent_id].new_iteration()
-                agent.reset()
+    def get_experiment_by_name(self, name):
+        return self.experiments[name]
 
-            self.environment.reset()
+    def get_experiment_by_index(self, index):
+        return self.experiments.values()[index]
 
-    def plot_metrics(self, metric_name, scale="linear"):
+    def run_all(self):
+        """
+        Runs every remaining experiment.
+        """
+        counter = 1
+        for id, exp in self.experiments.items():
+            if exp.was_run():
+                print(f"[{counter}/{self.get_experiment_count()}] Experiment {id} was already executed, skipping.")
+            else:
+                print(f"[{counter}/{self.get_experiment_count()}] Running experiment {id}...")
+                exp.run()
+            counter += 1
+
+    def save_all_metrics(self, metric_name, scale="linear"):
+        """
+        For each ran experiment, saves a png with the metric "metric_name" plotted.
+        This doesn't plot aggregated metrics, nor saves the results to file other than the image.
+        """
+        for id, exp in self.experiments.items():
+            if exp.was_run():
+                print(f"Storing metric {metric_name} for experiment {id}.")
+                exp.save_metrics(metric_name, scale) 
+            else:
+                print(f"Warning: experiment {id} was not run, so metric {metric_name} cannot be stored.")
+
+    def plot_all_metrics(self, metric_name, scale="linear"):
+        """
+        For each ran experiment, plots the metric "metric_name".
+        This doesn't plot aggregated metrics.
+        """
+        for id, exp in self.experiments.items():
+            if exp.was_run():
+                print(f"Plotting metric {metric_name} for experiment {id}.")
+                exp.plot_metrics(metric_name, scale) 
+            else:
+                print(f"Warning: experiment {id} was not run, so metric {metric_name} cannot be plotted.")
+
+    def save_state(self):
+        """
+        Stores the state of the simulation as pickle.
+        """
+        with open(self.name + ".pkl", "wb") as f:
+            pickle.dump(self, f)
+
+    def load_state(self):
+        """
+        Reloads the state of a pickled simulation and returns it.
+        """
+        with open(self.name + ".pkl", "rb") as f:
+            return pickle.load(f)
+
+    def plot_aggregated_metrics(self, metric_name):
+        """
+        Plots the final value of the given metric for each experiment.
+        The values are plotted left to right in order of insertion.
+        Make sure that "equivalent" agents are inserted in the same order
+        on each experiment so that they get connected if required.
+        """
+        # Collect values for each experiment.
+        vals = []
+        experiment_names = []
+        for id, exp in self.experiments.items():
+            if exp.was_run():
+                vals.append(exp.get_final_values(metric_name))
+                experiment_names.append(id)
+            else:
+                print(f"Warning: experiment {id} was not run, so metric {metric_name} cannot be plotted.")
+
+        num_agents = min([e.get_agent_count() for e in self.experiments.values()])
+        x_values = [i+1 for i in range(len(experiment_names))]
         plots = []
-        for i in range(len(self.agents)):
-            plt.xlabel('Epoch')
+        
+        for i in range(num_agents):
+            plt.xlabel("Experiment")
             plt.ylabel(metric_name)
-            plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
-        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))])
-        plt.xscale(scale)
-        plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
+            plots += plt.plot(x_values, [v[i] for v in vals], "o--", label=exp.get_agent_by_index(i).get_name())
+        
+        plt.xlim([0.8, len(x_values)+0.2])
+        plt.xticks(x_values, labels=experiment_names)
+        plt.legend()
+        plt.title(f"Results of simulation {self.name} with {self.get_experiment_count()} experiments")
         plt.show()
-
-    def save_metrics(self, metric_name, scale="linear"):
-        plots = []
-        plt.rcParams["figure.figsize"] = (10, 7)
-        for i in range(len(self.agents)):
-            plt.xlabel('Epoch')
-            plt.ylabel(metric_name)
-            plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
-        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))])
-        plt.xscale(scale)
-        plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
-        plt.savefig(metric_name + '.png')
-        plt.clf()
-
-### Test
-n_arms = 20
-n_iterations = 100000
-n_simulations = 250
-agents = []
-agents.append(EpsilonGreedyAgent(n_arms,0.1))
-agents.append(EpsilonGreedyAgent(n_arms,0))
-agents.append(UCBAgent(n_arms))
-agents.append(EXP3Agent(n_arms, exploration_rate=EXP3Gamma(3, n_iterations, n_arms)))
-agents.append(ThompsonBetaAgent(n_arms))
-agents.append(IFAgent(n_arms, n_iterations*0.8))
-agents.append(BTMAgent(n_arms, n_iterations*0.8, 1))
-# environment = BernoulliEnvironment.BernoulliEnvironment(n_arms)
-environment = GaussianEnvironment.GaussianEnvironment(n_arms)
-#environment = CyclicRPSEnvironment.CyclicRPSEnvironment(n_arms, std=0.5)
-#environment = NoisyGaussianEnvironment.NoisyGaussianEnvironment(n_arms, d=0.5)
-
-reductors = []
-reductors.append(IFAgent(n_arms, n_iterations))
-reductors.append(BTMAgent(n_arms, n_iterations))
-#reductors.append(DoublerAgent(n_arms, UCBAgent(n_arms)))
-#reductors.append(MultiSBMAgent(n_arms, UCBAgent, [n_arms]))
-#reductors.append(SparringAgent(n_arms, UCBAgent(n_arms), UCBAgent(n_arms)))
-reductors.append(DoublerAgent(n_arms, ThompsonBetaAgent(n_arms)))
-reductors.append(MultiSBMAgent(n_arms, ThompsonBetaAgent, [n_arms]))
-reductors.append(SparringAgent(n_arms, ThompsonBetaAgent(n_arms), ThompsonBetaAgent(n_arms)))
-reductors.append(DTSAgent(n_arms))
-reductors.append(RUCBAgent(n_arms))
-reductors.append(CCBAgent(n_arms))
-sim = Simulation(reductors, environment, n_iterations, n_simulations)
-sim.run()
-"""
-#sim.plot_metrics('optimal_percent')
-#sim.plot_metrics('regret')
-sim.plot_metrics('copeland_regret')
-sim.plot_metrics('copeland_regret_non_cumulative')
-sim.plot_metrics('copeland_regret', scale="log")
-sim.plot_metrics('copeland_regret_non_cumulative', scale="log")
-#sim.plot_metrics('reward')
-#sim.plot_metrics('weak_regret')
-#sim.plot_metrics('strong_regret')
-"""
-sim.save_metrics('optimal_percent')
-sim.save_metrics('regret')
-sim.save_metrics('copeland_regret', scale='log')
-sim.save_metrics('copeland_regret_non_cumulative', scale='log')
-sim.save_metrics('reward')
-sim.save_metrics('weak_regret')
-sim.save_metrics('strong_regret')
 
