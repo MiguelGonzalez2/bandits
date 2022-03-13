@@ -1,5 +1,6 @@
 """
 Interleaved Filter (IF) dueling bandit agent.
+Introduced in https://www.cs.cornell.edu/people/tj/publications/yue_etal_09a.pdf.
 """
 
 import random
@@ -7,12 +8,19 @@ import numpy as np
 from .DBAgent import DBAgent
 
 class IFAgent(DBAgent):
-    
+    """
+    Implements a dueling bandit agent following the Interleaved Filter policy.
+    """   
+
     def __init__(self, n_arms, horizon):
         """
-        Initializes IF Agent. The parameter "horizon" indicates the time horizon
-        for the algorithm to run.
+        Initializes IF Agent. 
+        
+        Args:
+            n_arms: number of arms
+            horizon: indicates the time horizon for the algorithm to run. 
         """
+
         super(IFAgent,self).__init__(n_arms)
         self.horizon = horizon
 
@@ -33,7 +41,11 @@ class IFAgent(DBAgent):
         """
         Updates the knowledge given the reward. Since it's a Dueling Bandit, the reward
         is a boolean indicating whether the first arm wins or not.
-        In Interleaved Filter, it updates the estimates and confidence intervals.
+
+        Args:
+            n_arm_1: first arm of the pulled pair.
+            n_arm_2: second arm of the pulled pair.
+            one_wins: boolean indicating whether the first arm won.
         """
 
         # If the leader has already been selected, no need to update.
@@ -97,7 +109,12 @@ class IFAgent(DBAgent):
         self.turn = 0
 
     def step(self):
-        """(Override) Returns the pair that should be matched, using Interleaved Filter"""
+        """
+        (Override) Returns the pair that should be matched, using IF
+
+        Returns:
+            Pair of indices (i,j) that the policy decided to pull.
+        """
 
         # If we're finished determining a leader, we stick to it.
         if not self.candidates:
@@ -106,11 +123,20 @@ class IFAgent(DBAgent):
         return self.leader, self.candidates[self.turn]
         
     def reset(self):
-        """Fully resets the agent"""
+        """
+        Fully resets the agent
+        """
+
         super().reset()
         self.leader = 0
         self.candidates = range(1, self.n_arms)
         self.turn = 0
 
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"Interleaved Filter DB w/horizon={self.horizon}"

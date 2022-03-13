@@ -1,21 +1,29 @@
 """
 Thompson Sampling Agent intended for bernoulli environments.
 As such, it uses the beta distribution as its parameter distribution.
+As presented in https://papers.nips.cc/paper/4321-an-empirical-evaluation-of-thompson-sampling.
 """
 
 import numpy as np
 from .MABAgent import MABAgent
 
 class ThompsonBetaAgent(MABAgent):
-    
+    """
+    Implements a multi armed bandit agent following the Thompson Sampling (with beta prior) policy.
+    """    
+
     def __init__(self, n_arms, alpha_zero=1, beta_zero=1, failure_thres=1/2, optimism=None):
         """
         Initializes the agent. 
-        - alpha_zero and beta_zero are the starting parameters for the 
-        prior beta distribution.
-        - failure_thres governs what counts as a bernoulli failure. Any reward
-        below the threshold will counted as a failure. This exists mainly to support
-        testing this agent in non-bernoulli environments (don't set this value for bernoulli environments).
+
+        Args:
+            n_arms: number of arms.
+            alpha_zero: starting alpha parameter value for the alpha distribution.
+            beta_zero: starting beta parameter value for the beta distribution.
+            failure_thres: governs what counts as a bernoulli failure. Any reward
+                below the threshold will counted as a failure. This exists mainly to support
+                testing this agent in non-bernoulli environments (don't set this value for bernoulli environments).
+            optimism: starting estimation for the value of every arm.
         """
         super(ThompsonBetaAgent,self).__init__(n_arms, optimism)
         self.alpha = alpha_zero
@@ -25,7 +33,12 @@ class ThompsonBetaAgent(MABAgent):
         self.failures = np.zeros(n_arms)
 
     def step(self):
-        """(Override) Returns the arm that should be pulled using Thompson Sampling for Bernoulli Environments"""
+        """
+        (Override) Returns the arm that should be pulled, using Thompson Sampling with beta prior.
+
+        Returns:
+            Index i of the arm that the policy decided to pull.
+        """
         estimated_params = np.empty(self.n_arms) # Holds the estimated parameters
 
         # Estimate the parameters
@@ -36,7 +49,13 @@ class ThompsonBetaAgent(MABAgent):
         return np.argmax(estimated_params)
 
     def reward(self, n_arm, reward):
-        """Updates the knowledge given the reward"""
+        """
+        Updates the knowledge given the reward. 
+
+        Args:
+            n_arm: pulled arm.
+            reward: numerical reward obtained.
+        """
         super().reward(n_arm, reward)
 
         # Update counters
@@ -46,10 +65,18 @@ class ThompsonBetaAgent(MABAgent):
             self.successes[n_arm] += 1
 
     def reset(self):
+        """
+        Fully resets the agent
+        """
         super().reset()
         self.successes = np.zeros(self.n_arms)
         self.failures = np.zeros(self.n_arms)
         
-
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"Thompson Sampling MAB using Beta prior w/alpha={self.alpha}, beta={self.beta}"

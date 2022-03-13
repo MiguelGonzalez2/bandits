@@ -1,5 +1,6 @@
 """
 Beat The Mean (BTM) dueling bandit agent.
+Initially presented at https://www.cs.cornell.edu/people/tj/publications/yue_joachims_11a.pdf.
 """
 
 import random
@@ -8,12 +9,20 @@ from numpy.core.numeric import Inf
 from .DBAgent import DBAgent
 
 class BTMAgent(DBAgent):
-    
+    """
+    Implements a dueling bandit agent following the Beat the Mean policy.
+    """
+
     def __init__(self, n_arms, horizon, gamma=1):
         """
-        Initializes IF Agent. The parameter "horizon" indicates the time horizon
-        for the algorithm to run. The parameter gamma represents transitivity relaxation.
+        Initializes BTM Agent. 
+        
+        Args:
+            n_arms: number of arms
+            horizon: indicates the time horizon for the algorithm to run. 
+            gamma: represents transitivity relaxation.
         """
+
         super(BTMAgent,self).__init__(n_arms)
         self.horizon = horizon
         self.gamma = gamma
@@ -41,6 +50,11 @@ class BTMAgent(DBAgent):
         """
         Updates the knowledge given the reward. Since it's a Dueling Bandit, the reward
         is a boolean indicating whether the first arm wins or not.
+
+        Args:
+            n_arm_1: first arm of the pulled pair.
+            n_arm_2: second arm of the pulled pair.
+            one_wins: boolean indicating whether the first arm won.
         """
         # If winner was already selected no need to update
         if len(self.working_set) == 1 or self.steps >= self.horizon:
@@ -95,7 +109,12 @@ class BTMAgent(DBAgent):
 
 
     def step(self):
-        """(Override) Returns the pair that should be matched, using BTM"""
+        """
+        (Override) Returns the pair that should be matched, using BTM
+
+        Returns:
+            Pair of indices (i,j) that the policy decided to pull.
+        """
 
         # If we're finished determining a leader, we stick to it.
         if len(self.working_set) == 1 or self.steps >= self.horizon:
@@ -116,7 +135,10 @@ class BTMAgent(DBAgent):
         return arm1, arm2
         
     def reset(self):
-        """Fully resets the agent"""
+        """
+        Fully resets the agent
+        """
+
         super().reset()
         self.working_set = list(range(self.n_arms))
         self.wins = np.zeros((self.n_arms, self.n_arms))
@@ -125,4 +147,10 @@ class BTMAgent(DBAgent):
         self.steps = 0
 
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"Beat the Mean DB w/horizon={self.horizon}, gamma={self.gamma}"

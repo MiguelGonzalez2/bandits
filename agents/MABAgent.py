@@ -1,16 +1,19 @@
 """
-MAB Agent class.
+Generic Multi Armed Bandit Agent class.
+Overriding this class allows for custom agent implementations.
 """
 
 import numpy as np
 
 class MABAgent():
     """Abstract class for MAB Agent"""
+
     def __init__(self, n_arms, optimism=None):
         """
         Initializes MABAgent object.
-        n_arms -> Number of arms
-        optimism -> starting value for rewards
+        Args:
+            n_arms: Number of arms
+            optimism: starting value for rewards
         """
         self.averages = np.array([optimism if optimism else np.NINF] * n_arms)
         self.optimism = optimism
@@ -19,7 +22,13 @@ class MABAgent():
         self.is_dueling = False # Used when comparing DBs and MABs in the same simulation
 
     def reward(self, n_arm, reward):
-        """Updates the knowledge given the reward"""
+        """
+        Updates the knowledge given the reward. 
+
+        Args:
+            n_arm: pulled arm.
+            reward: numerical reward obtained.
+        """
         if self.averages[n_arm] == np.NINF:
             self.averages[n_arm] = reward
         else:
@@ -30,17 +39,35 @@ class MABAgent():
         self.times_explored[n_arm] += 1
 
     def step(self):
-        """Returns the arm that should be pulled. This should be overriden"""
+        """
+        (Override) Returns the arm that should be pulled, using EXP3.
+
+        Returns:
+            Index i of the arm that the policy decided to pull.
+        """
         return 0
 
     def reset(self):
-        """Resets agent."""
+        """
+        Fully resets the agent
+        """
         self.averages = np.array([self.optimism if self.optimism else np.NINF] * self.n_arms)
         self.times_explored = np.zeros(self.n_arms)
 
     def get_best(self):
-        """Returns the index of the best prediction so far"""
+        """
+        Get the best arm prediction so far.
+
+        Returns:
+            index of the estimated best arm.
+        """
         return np.argmax(self.averages)
 
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return "Default MAB"

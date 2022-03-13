@@ -13,6 +13,7 @@ from agents.SparringAgent import SparringAgent
 from agents.DTSAgent import DTSAgent
 from agents.RUCBAgent import RUCBAgent
 from agents.CCBAgent import CCBAgent
+from agents.RandomAgent import RandomAgent
 from environments import GaussianEnvironment
 
 N_EPOCHS = 10000
@@ -22,12 +23,11 @@ MAX_N_REPEATS = 200 # Maximum number of repeats
 N_ARM_VALUES = [10, 20, 30, 50, 100, 150, 200]
 
 sim = Simulation(f"change arm number, {N_EPOCHS} epochs, equally spaced arms")
-
 sim = sim.load_state()
-sim.plot_aggregated_metrics('copeland_regret')
-
+"""
 for n_arms in N_ARM_VALUES:
     agents = []
+    agents.append(RandomAgent(n_arms))
     agents.append(IFAgent(n_arms, N_EPOCHS))
     agents.append(BTMAgent(n_arms, N_EPOCHS))
     agents.append(DoublerAgent(n_arms, ThompsonBetaAgent(n_arms)))
@@ -43,6 +43,8 @@ for n_arms in N_ARM_VALUES:
     sim.add_experiment(Experiment(f"N = {n_arms}", agents, environ, N_EPOCHS, n_repeats, plot_position=n_arms))
 
 sim.run_all(save = True)
+"""
 
-sim.plot_aggregated_metrics('copeland_regret')
-sim.save_all_metrics('copeland_regret')
+#sim.plot_aggregated_metrics('copeland_regret', [-10, 10])
+#sim.plot_aggregated_metrics('weak_regret', [-10, 10])
+#sim.plot_aggregated_metrics('strong_regret', [-10, 10])

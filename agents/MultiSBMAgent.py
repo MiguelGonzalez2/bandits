@@ -1,24 +1,27 @@
 """
 MultiSBM (MAB reduction) dueling bandit agent.
+First introduced in http://proceedings.mlr.press/v32/ailon14.pdf.
 """
 
-import random
-import numpy as np
-from numpy.core.numeric import Inf
 from .DBAgent import DBAgent
 
 class MultiSBMAgent(DBAgent):
-    
+    """
+    Implements a dueling bandit agent following the MultiSBM policy.
+    """  
+
     def __init__(self, n_arms, mab_callable, mab_args=[], mab_kwargs=dict()):
         """
         Initializes MultiSBM agent. This agent allows a MAB to be used
         with dueling bandits.
-        mab_callable -> Callable that returns an object of type MABAgent
-        to be used within the MultiSBM.
-        mab_args -> List of arguments to be passed to the MAB callable on
-        creation.
-        mab_kwargs -> Dict of key-word arguments to be passed to the MAB
-        callable on creation.
+
+        Args:
+            mab_callable: Callable that returns an object of type MABAgent
+                to be used within the MultiSBM.
+            mab_args: List of arguments to be passed to the MAB callable on
+                creation.
+            mab_kwargs: Dict of key-word arguments to be passed to the MAB
+                callable on creation.
         """
         super(MultiSBMAgent,self).__init__(n_arms)
         self.mab_callable = mab_callable
@@ -38,13 +41,23 @@ class MultiSBMAgent(DBAgent):
         Updates the knowledge given the reward. Since it's a Dueling Bandit, the reward
         is a boolean indicating whether the first arm wins or not.
         In MultiSBM it feeds the comparison result to the agent in charge of facing arm 1.
+
+        Args:
+            n_arm_1: first arm of the pulled pair.
+            n_arm_2: second arm of the pulled pair.
+            one_wins: boolean indicating whether the first arm won.
         """
         
         # Feed the MAB whether it won.
         self.mabs[n_arm_1].reward(n_arm_2, int(not one_wins))
 
     def step(self):
-        """(Override) Returns the pair that should be matched, using MultiSBM"""
+        """
+        (Override) Returns the pair that should be matched, using MultiSBM
+
+        Returns:
+            Pair of indices (i,j) that the policy decided to pull.
+        """
 
         # Arm 1 is determined by the last arm 2
         arm1 = self.last_played
@@ -57,11 +70,19 @@ class MultiSBMAgent(DBAgent):
 
         
     def reset(self):
-        """Fully resets the agent"""
+        """
+        Fully resets the agent
+        """
         super().reset()
         for mab in self.mabs:
             mab.reset()
         self.last_played = 0
 
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"MultiSBM DB w/MAB: {self.mabs[0].get_name()}"

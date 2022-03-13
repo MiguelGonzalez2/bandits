@@ -1,18 +1,25 @@
 """
-Copeland Confidence Bound (CCB) Dueling Bandit Agent
+Copeland Confidence Bound (CCB) Dueling Bandit Agent.
+Initially presented at https://arxiv.org/abs/1506.00312.
 """
 
 import numpy as np
 from .DBAgent import DBAgent
 
 class CCBAgent(DBAgent):
+    """
+    Implements a dueling bandit agent following the CCB policy.
+    """
     
     def __init__(self, n_arms, alpha=0.51):
         """
-        Initializes CCB agent, which is the adaptation of
-        RUCB to a non-condorcet setting. 
-        alpha -> "Exploration rate" similar to UCB.
+        Initializes CCB agent.
+
+        Args:
+            n_arms: number of arms
+            alpha: "exploration rate" similar to UCB.
         """
+
         super(CCBAgent,self).__init__(n_arms)
 
         # UCB exp rate
@@ -31,7 +38,12 @@ class CCBAgent(DBAgent):
         self.time = 1
 
     def step(self):
-        """(Override) Returns the pair that should be matched, using RUCB"""
+        """
+        (Override) Returns the pair that should be matched, using CCB.
+
+        Returns:
+            Pair of indices (i,j) that the policy decided to pull.
+        """
 
         # Compute Upper Bounds for confidence intervals (UCB) and lower bounds
         total_matches = self.outcomes + np.transpose(self.outcomes)
@@ -122,7 +134,10 @@ class CCBAgent(DBAgent):
         
         
     def reset(self):
-        """Fully resets the agent"""
+        """
+        Fully resets the agent
+        """
+
         super().reset()
         self.time = 1
         self.best = set(range(self.n_arms))
@@ -130,4 +145,10 @@ class CCBAgent(DBAgent):
         self.copeland_winner_losses = self.n_arms
         
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"CCB DB w/a: {self.alpha}"

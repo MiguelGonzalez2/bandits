@@ -1,1 +1,1 @@
-"""Init module"""
+"""Environments module"""

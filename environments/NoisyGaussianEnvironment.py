@@ -9,14 +9,23 @@ import numpy as np
 from scipy.stats import norm
 
 class NoisyGaussianEnvironment(GaussianEnvironment):
+    """
+    Implements noisy gaussian environment.
+    IMPORTANT: this environment behaves exactly like a gaussian environment
+    if only the method "step" is used to get rewards. However, the method
+    "dueling_step" is the one that will return the appropriate outcome with
+    noisy distribution.
+    """
 
     def __init__(self, n_arms, value_generator = np.random.normal, values = None, d=0.1):
         """
         Initializes the environment.
-        n_arms -> Number of arms
-        value_generator -> Generator function for each arm hidden value (true reward)
-        values -> Actual arm values. If given, value_generator is unused.
-        d -> Amount of noise added. The higher, the less transitivity.
+
+        Args:
+            n_arms: Number of arms
+            value_generator: Function for each arm hidden value (true reward)
+            values: Arm values. If given, value_generator is ignored.
+            d: Amount of noise added. The higher, the less transitivity.
         """
         super(NoisyGaussianEnvironment,self).__init__(n_arms, value_generator, values)
         self.d = d
@@ -36,6 +45,13 @@ class NoisyGaussianEnvironment(GaussianEnvironment):
         in order to compare with multi-armed bandits. HOWEVER, dueling
         bandits should never see these values, only the result of the
         pairwise comparison.
+
+        Args:
+            n_arm1: first arm of the pair.
+            n_arm2: second arm of the pair.
+
+        Returns:
+            Tuple containing the reward of each arm.
         """
         self.pulls[n_arm1] += 1
         self.pulls[n_arm2] += 1
@@ -54,6 +70,13 @@ class NoisyGaussianEnvironment(GaussianEnvironment):
         the distribution. 
 
         For the normal distribution, is 1 - cdf((m2-m1)/sqrt(var1+var2))
+
+        Args:
+            arm1: first arm to be compared
+            arm2: second arm to be compared
+
+        Returns:
+            Probability that arm1 >= arm2.
         """
         return 1 - norm.cdf((self.arms[arm2] - self.arms[arm1] - self.epsilons[arm1,arm2]) / np.sqrt(2))
 
@@ -71,4 +94,10 @@ class NoisyGaussianEnvironment(GaussianEnvironment):
 
 
     def get_name(self):
+        """
+        String representation of the environment.
+
+        Returns:
+            string representing the environment.
+        """
         return f"Noisy Gaussian Arms with d={self.d}"

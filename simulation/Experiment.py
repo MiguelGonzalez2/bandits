@@ -9,7 +9,6 @@ from tqdm import tqdm
 import random
 
 class Experiment():
-
     """
     Class that encapsulates all the data needed for a single experiment.
     Here, a "single experiment" means a fixed set of agents against a
@@ -19,13 +18,16 @@ class Experiment():
 
     def __init__(self, name, agents, environment, n_epochs, n_repeats=1, plot_position = None):
             """
-            Name: identifier for the experiment. Must be unique.
-            Agents: list of agents to simulate
-            Environment: Environment object with the arms
-            n_epochs: Nº of iterations per agent on a given environment
-            n_repeats: Nº of environments per agent for robustness
-            plot_position: If this experiment can be parameterized within the simulation by a cardinal value 
-            (for example, the number of arms), it should be indicated here for consistent plots.
+            Initializes the experiment.
+
+            Args:
+                Name: identifier for the experiment. Must be unique.
+                Agents: list of agents to simulate
+                Environment: Environment object with the arms
+                n_epochs: Nº of iterations per agent on a given environment
+                n_repeats: Nº of environments per agent for robustness
+                plot_position: If this experiment can be parameterized within the simulation by a cardinal value 
+                    (for example, the number of arms), it should be indicated here for consistent plots.
             """
             self.name = name
             self.agents = agents
@@ -83,6 +85,10 @@ class Experiment():
     def plot_metrics(self, metric_name, scale="linear"):
         """
         Plots and shows given metric for the experiment.
+
+        Args:
+            metric_name: Name of the desired metric within the available ones (check module "Metrics" or readme).
+            scale: pyplot scale format for both axes.
         """
         plots = []
         for i in range(len(self.agents)):
@@ -97,6 +103,10 @@ class Experiment():
     def save_metrics(self, metric_name, scale="linear"):
         """
         Plots and stores to png given metric for the experiment.
+
+        Args:
+            metric_name: Name of the desired metric within the available ones (check module "Metrics" or readme).
+            scale: pyplot scale format for both axes.
         """
         plots = []
         plt.rcParams["figure.figsize"] = (10, 7)
@@ -113,6 +123,9 @@ class Experiment():
     def get_name(self):
         """
         Returns the name of the experiment.
+
+        Returns:
+            the name of the experiment.
         """
         return self.name
 
@@ -122,14 +135,41 @@ class Experiment():
     def get_final_values(self, metric_name):
         """
         Returns dictionary "agent_index: value" where the value is the final value for metric_name.
+
+        Args:
+            metric_name: Name of the desired metric within the available ones (check module "Metrics" or readme).
+
+        Returns:
+            dictionary "agent_index: value" where the value is the final value for metric_name.
         """
         return {i: self.metrics[i].get_metric_result(metric_name) for i in range(len(self.agents))}
 
     def get_agent_count(self):
+        """
+        Returns number of agents.
+
+        Returns:
+            number of agents.
+        """
         return len(self.agents)
 
     def get_agent_by_index(self, index):
+        """
+        Returns agent object by given index.
+
+        Args:
+            index: index of the desired agent.
+
+        Returns:
+            agent object.
+        """
         return self.agents[index]
 
     def get_plot_position(self):
+        """
+        Returns this object "plot position" value.
+        
+        Returns:
+            this object "plot position" value.
+        """
         return self.plot_position

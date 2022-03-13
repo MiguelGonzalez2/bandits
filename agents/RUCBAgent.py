@@ -1,16 +1,23 @@
 """
-Relative UCB (RUCB) Dueling Bandit Agent
+Relative UCB (RUCB) Dueling Bandit Agent.
+First introduced in: http://proceedings.mlr.press/v32/zoghi14.pdf
 """
 
 import numpy as np
 from .DBAgent import DBAgent
 
 class RUCBAgent(DBAgent):
-    
+    """
+    Implements a dueling bandit agent following the RUCB policy.
+    """
+
     def __init__(self, n_arms, alpha=0.51):
         """
-        Initializes RUCB agent. 
-        alpha -> "Exploration rate" similar to UCB.
+        Initializes RUCB agent.
+
+        Args:
+            n_arms: number of arms. 
+            alpha: "Exploration rate" similar to UCB.
         """
         super(RUCBAgent,self).__init__(n_arms)
 
@@ -24,7 +31,12 @@ class RUCBAgent(DBAgent):
         self.time = 1
 
     def step(self):
-        """(Override) Returns the pair that should be matched, using RUCB"""
+        """
+        (Override) Returns the pair that should be matched, using RUCB.
+
+        Returns:
+            Pair of indices (i,j) that the policy decided to pull.
+        """
 
         # Compute Upper Bounds for confidence intervals (UCB)
         total_matches = self.outcomes + np.transpose(self.outcomes)
@@ -69,10 +81,18 @@ class RUCBAgent(DBAgent):
         
         
     def reset(self):
-        """Fully resets the agent"""
+        """
+        Fully resets the agent
+        """
         super().reset()
         self.time = 1
         self.best = None
 
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"RUCB DB w/a: {self.alpha}"

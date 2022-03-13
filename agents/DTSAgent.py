@@ -1,5 +1,6 @@
 """
-Double Thompson Sampling (DTS) Dueling Bandit Agent
+Double Thompson Sampling (DTS) Dueling Bandit Agent.
+First introduced in https://www.researchgate.net/publication/301648067_Double_Thompson_Sampling_for_Dueling_Bandits.
 """
 
 import numpy as np
@@ -10,9 +11,12 @@ class DTSAgent(DBAgent):
     def __init__(self, n_arms, alpha=1, beta=1, gamma=1):
         """
         Initializes Double Thompson Sampling agent. 
-        alpha -> Starting alpha parameter for thompson sampling
-        beta -> Starting beta parameter for thompson sampling
-        gamma -> Size of the confidence interval for the starting UCB-like pruning phase.
+
+        Args:
+            n_arms: number of arms.
+            alpha: Starting alpha parameter for thompson sampling
+            beta: Starting beta parameter for thompson sampling
+            gamma: Size of the confidence interval for the starting UCB-like pruning phase.
         """
         super(DTSAgent,self).__init__(n_arms)
 
@@ -24,7 +28,12 @@ class DTSAgent(DBAgent):
         self.time = 1
 
     def step(self):
-        """(Override) Returns the pair that should be matched, using DTS"""
+        """
+        (Override) Returns the pair that should be matched, using DTS.
+
+        Returns:
+            Pair of indices (i,j) that the policy decided to pull.
+        """
 
         # Confidence interval for each probability
         total_matches = self.outcomes + np.transpose(self.outcomes)
@@ -61,9 +70,17 @@ class DTSAgent(DBAgent):
         return arm1, arm2
         
     def reset(self):
-        """Fully resets the agent"""
+        """
+        Fully resets the agent
+        """
         super().reset()
         self.time = 1
 
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"DTS DB w/a: {self.alpha}, b: {self.beta}, g: {self.gamma}"

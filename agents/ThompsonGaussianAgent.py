@@ -2,6 +2,7 @@
 Thompson Sampling Agent intended for gaussian environments.
 As such, it uses the gaussian distribution as its parameter distribution, and
 also a inverted gamma for the variance distribution.
+As presented in https://papers.nips.cc/paper/4321-an-empirical-evaluation-of-thompson-sampling.
 """
 
 import numpy as np
@@ -9,19 +10,26 @@ from scipy.stats import invgamma
 from .MABAgent import MABAgent
 
 class ThompsonGaussianAgent(MABAgent):
-    
+    """
+    Implements a multi armed bandit agent following the Thompson Sampling (with Gaussian prior) policy.
+    """   
+
     def __init__(self, n_arms, avg_zero=0, k_zero=1, sigma_zero=1, nu_zero=1, optimism=None):
         """
-        Initializes the agent with the following statistical parameters:
-        - avg_zero is the starting prediction for the reward average
-        - k_zero is the starting certainty for avg_zero
-        - sigma_zero is the starting prediction for the degrees of freedom of the variance
-        - nu_zero is the scale for the degree of the variance parameter
+        Initializes thompson sampling agent with gaussian prior.
         More on the statistical background (bayesian conjugate for normal distribution with
         unknown mean and variance) can be found on section 3 of the book:
         http://www.stat.columbia.edu/~gelman/book/BDA3.pdf
         Which has been conveniently summarized for the 1-D case in here:
         https://richrelevance.com/2013/07/31/bayesian-analysis-of-normal-distributions-with-python/
+
+        Args:
+            n_arms: number of arms.
+            avg_zero: is the starting prediction for the reward average.
+            k_zero: is the starting certainty for avg_zero.
+            sigma_zero: is the starting prediction for the degrees of freedom of the variance.
+            nu_zero: is the scale for the degree of the variance parameter.
+            optimism: starting estimation for the value of each arm.
         """
         super(ThompsonGaussianAgent,self).__init__(n_arms, optimism)
         self.avg_zero = avg_zero
@@ -35,7 +43,13 @@ class ThompsonGaussianAgent(MABAgent):
         self.square_sum = np.zeros(self.n_arms)
 
     def step(self):
-        """(Override) Returns the arm that should be pulled using Thompson Sampling for Gaussian Environments"""
+        """
+        (Override) Returns the arm that should be pulled, using Thompson Sampling with gaussian prior.
+
+        Returns:
+            Index i of the arm that the policy decided to pull.
+        """
+
         estimated_params = np.empty(self.n_arms) # Holds the estimated parameters
 
         # Estimate the parameters
@@ -70,16 +84,31 @@ class ThompsonGaussianAgent(MABAgent):
         return np.argmax(estimated_params)
 
     def reward(self, n_arm, reward):
-        """Updates the knowledge given the reward"""
+        """
+        Updates the knowledge given the reward. 
+
+        Args:
+            n_arm: pulled arm.
+            reward: numerical reward obtained.
+        """
         super().reward(n_arm, reward)
 
         # Update the average of squares:
         self.square_sum[n_arm] += reward**2
 
     def reset(self):
+        """
+        Fully resets the agent
+        """
         super().reset()
         self.square_avg = np.zeros(self.n_arms)
         
 
     def get_name(self):
+        """
+        String representation of the agent.
+
+        Returns:
+            string representing the agent.
+        """
         return f"Thompson Sampling MAB using Normal prior w/params=({self.avg_zero},{self.k_zero},{self.sigma_zero},{self.nu_zero})"

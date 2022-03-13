@@ -1,1 +1,1 @@
-"""Init module"""
+"""Agents module"""

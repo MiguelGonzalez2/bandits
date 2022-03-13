@@ -1,21 +1,24 @@
 """
-Environment class.
+Generic Environment class.
+Can be overriden to support custom implementations.
 """
 
 import numpy as np
 
 class Environment():
-    """Implements abstract MABEnvironment w/ constant output"""
+    """Implements abstract Environment w/ constant output"""
 
     def __init__(self, n_arms, value_generator = np.random.normal, values = None):
         """
         Initializes the environment.
-        n_arms -> Number of arms
-        value_generator -> Function for each arm hidden value (true reward)
-        values -> Arm values. If given, value_generator is ignored.
+
+        Args:
+            n_arms: Number of arms
+            value_generator: Function for each arm hidden value (true reward)
+            values: Arm values. If given, value_generator is ignored.
         """
         self.value_generator = value_generator
-        if not values:
+        if values is None:
             self.arms = np.array([value_generator() for i in range(n_arms)])
         else:
             if len(values) > n_arms:
@@ -41,6 +44,12 @@ class Environment():
     def pull(self, n_arm):
         """
         Pulls a given arm and returns reward. Override in subclasses.
+
+        Args:
+            n_arm: arm to be pulled.
+
+        Returns:
+            value of the reward obtained.
         """
         return self.arms[n_arm]
 
@@ -48,6 +57,12 @@ class Environment():
         """
         Returns reward for given arm, updating internal values
         This is used for Multi Armed Bandits steps.
+
+        Args:
+            n_arm: arm to be pulled.
+
+        Returns:
+            value of the reward obtained.
         """
         self.pulls[n_arm] += 1
         self.steps += 1
@@ -61,6 +76,13 @@ class Environment():
         in order to compare with multi-armed bandits. HOWEVER, dueling
         bandits should never see these values, only the result of the
         pairwise comparison.
+
+        Args:
+            n_arm1: first arm of the pair.
+            n_arm2: second arm of the pair.
+
+        Returns:
+            Tuple containing the reward of each arm.
         """
         self.pulls[n_arm1] += 1
         self.pulls[n_arm2] += 1
@@ -69,14 +91,14 @@ class Environment():
 
     def soft_reset(self):
         """
-        Only resets metrics but environment is kept the same
+        Only resets metrics but environment is kept the same.
         """
         self.pulls = np.zeros(self.n_arms)
         self.steps = 0
         
     def reset(self):
         """
-        Resets environment internals
+        Resets environment internals.
         """
         self.soft_reset()
         self.arms = np.array([self.value_generator() for i in range(self.n_arms)])
@@ -91,24 +113,39 @@ class Environment():
     def get_optimal(self):
         """
         Returns the index of the best arm in the environment.
+
+        Returns:
+            index of the best arm in the environment.
         """
         return np.argmax(self.copeland_scores)
 
     def get_optimal_value(self):
         """
         Returns the best value of the environment.
+
+        Returns:
+            the best value of the environment.
         """
         return np.max(self.arms)
 
     def get_copeland_winners(self):
         """
         Returns a numpy array with the arms with highest copeland score.
+
+        Returns:
+            a numpy array with the arms with highest copeland score.
         """
         return np.flatnonzero(self.copeland_scores == self.copeland_scores.max())
 
     def get_copeland_regret(self, arm):
         """
         Returns the copeland individual arm regret.
+
+        Args:
+            arm: index of the arm whose regret is to be obtained.
+
+        Returns:
+            the copeland regret for the arm.
         """
         if self.copeland_regrets[arm] > np.NINF:
             return self.copeland_regrets[arm]
@@ -133,6 +170,13 @@ class Environment():
         Receives two arms and returns the probability that arm1 >= arm2.
         This should be overriden depending on the "pull" function, to match
         the distribution. 
+
+        Args:
+            arm1: first arm to be compared
+            arm2: second arm to be compared
+
+        Returns:
+            Probability that arm1 >= arm2.
         """
         return arm1 / (arm1 + arm2)
 
@@ -140,6 +184,13 @@ class Environment():
         """
         Receives two arms and returns the probability that arm1 >= arm2.
         Uses cached data to save time. 
+
+        Args:
+            arm1: first arm to be compared
+            arm2: second arm to be compared
+
+        Returns:
+            Probability that arm1 >= arm2.
         """
         if self.probabilities_dueling[arm1, arm2] < 0:
             prob = self.get_probability_dueling(arm1, arm2)
@@ -148,4 +199,10 @@ class Environment():
         return self.probabilities_dueling[arm1, arm2]
 
     def get_name(self):
+        """
+        String representation of the environment.
+
+        Returns:
+            string representing the environment.
+        """
         return f"Default"
