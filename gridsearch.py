@@ -12,7 +12,7 @@ N_EPOCHS = 10000
 N_REPEATS = 10 # Number of repeats for the largest amount of arms. The remaining arms are run more times since its cheaper.
 MAX_N_REPEATS = 200 # Maximum number of repeats
 
-N_ARM_VALUES = [30]
+N_ARM_VALUES = [100]
 
 sim = Simulation(f"Thompson Sampling Gridsearch, {N_EPOCHS} epochs, {N_ARM_VALUES[0]} arms.")
 
@@ -32,6 +32,7 @@ for n_arms in N_ARM_VALUES:
     sim.add_experiment(Experiment(f"N = {n_arms}", agents, environ, N_EPOCHS, n_repeats, plot_position=n_arms))
 
 sim.run_all(save = True)
+
 
 list(sim.experiments.values())[0].plot_metric_grid('copeland_regret', rows = len(alphas), columns = len(betas), xlabels=[str(x) for x in alphas], ylabels=[str(x) for x in betas], xlabel = "Alpha", ylabel= "Beta")
 #sim.plot_aggregated_metrics('copeland_regret', [-10, 10])

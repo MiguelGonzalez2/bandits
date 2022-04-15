@@ -190,7 +190,7 @@ class Experiment():
             for column in range(columns):
                 arr[row, column] = vals[row*columns + column]
 
-        plt.imshow(arr, cmap = plt.cm.Blues, origin="lower")
+        plt.imshow(arr, cmap = plt.cm.turbo, origin="lower")
         plt.xlabel("Experiment", fontsize = labelsize)
         plt.ylabel(metric_name, fontsize = labelsize)
         if xlabel:
