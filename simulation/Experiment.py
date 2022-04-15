@@ -6,6 +6,7 @@ from .Metrics import Metrics as mm
 
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import numpy as np
 import random
 
 class Experiment():
@@ -173,3 +174,36 @@ class Experiment():
             this object "plot position" value.
         """
         return self.plot_position
+
+    def plot_metric_grid(self, metric_name, rows = 1, columns = 1, scale='linear', xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, xlabels = None, ylabels = None):
+        """
+        Plots grid, intended for gridsearch.
+
+        xlabels -> horizontal labels left to right.
+        ylabels -> vertical labels bottom to top.
+        """
+        # Collect values for each experiment.
+        vals = np.array(list(self.get_final_values(metric_name).values()))
+
+        arr = np.zeros((rows, columns))
+        for row in range(rows):
+            for column in range(columns):
+                arr[row, column] = vals[row*columns + column]
+
+        plt.imshow(arr, cmap = plt.cm.Blues, origin="lower")
+        plt.xlabel("Experiment", fontsize = labelsize)
+        plt.ylabel(metric_name, fontsize = labelsize)
+        if xlabel:
+            plt.xlabel(xlabel, fontsize = labelsize)
+        if ylabel:
+            plt.ylabel(ylabel, fontsize = labelsize)
+        plt.xscale(scale)
+        plt.title(f"Heatmap of experiment {self.name}", fontsize = titlesize)
+        if title:
+            plt.title(title, fontsize = titlesize)
+        if xlabels:
+            plt.xticks(range(columns), xlabels)
+        if ylabels:
+            plt.yticks(range(rows), ylabels)
+        plt.colorbar()
+        plt.show()

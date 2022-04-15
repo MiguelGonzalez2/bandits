@@ -154,7 +154,7 @@ class Simulation():
         with open(self.name + ".pkl", "rb") as f:
             return pickle.load(f)
 
-    def plot_aggregated_metrics(self, metric_name, padding=[1,1], scale='linear', cut_ticks = None):
+    def plot_aggregated_metrics(self, metric_name, padding=None, scale='linear', cut_ticks = None, xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, names = None):
         """
         Plots the final value of the given metric for each experiment.
         The values are plotted left to right in order of insertion.
@@ -182,6 +182,7 @@ class Simulation():
 
         num_agents = min([e.get_agent_count() for e in self.experiments.values()])
         plots = []
+        name_counter = 0
 
         # Set color range to avoid repetition
         colormap = plt.cm.nipy_spectral
@@ -189,16 +190,26 @@ class Simulation():
         mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=colors)
         
         for i in range(num_agents):
-            plt.xlabel("Experiment")
-            plt.ylabel(metric_name)
-            plots += plt.plot(x_values, [v[i] for v in vals], "o--", label=exp.get_agent_by_index(i).get_name())
-        
+            if names and name_counter < len(names):
+                plots += plt.plot(x_values, [v[i] for v in vals], "o--", label=names[name_counter])
+                name_counter += 1
+            else:
+                plots += plt.plot(x_values, [v[i] for v in vals], "o--", label=exp.get_agent_by_index(i).get_name())
+
+        plt.xlabel("Experiment", fontsize = labelsize)
+        plt.ylabel(metric_name, fontsize = labelsize)
+        if xlabel:
+            plt.xlabel(xlabel, fontsize = labelsize)  
+        if ylabel:
+            plt.ylabel(ylabel, fontsize = labelsize) 
         plt.xscale(scale)
-        plt.xlim([min(x_values)-padding[0], max(x_values)+padding[1]])
+        if padding:
+            plt.xlim([min(x_values)-padding[0], max(x_values)+padding[1]])
         plt.xticks(x_values if not cut_ticks else [x for x in x_values if x >= cut_ticks[0] and x <= cut_ticks[1]], 
                     labels=experiment_names if not cut_ticks else [experiment_names[i] for i in range(len(experiment_names)) 
                     if x_values[i] >= cut_ticks[0] and x_values[i] <= cut_ticks[1]])
         plt.legend()
-        plt.title(f"Results of simulation \'{self.name}\' with {self.get_experiment_count()} experiments")
+        plt.title(f"Results of simulation \'{self.name}\' with {self.get_experiment_count()} experiments", fontsize = titlesize)
+        if title:
+            plt.title(title, fontsize = titlesize)
         plt.show()
-
