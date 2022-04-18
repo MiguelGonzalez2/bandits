@@ -154,7 +154,7 @@ class Simulation():
         with open(self.name + ".pkl", "rb") as f:
             return pickle.load(f)
 
-    def plot_aggregated_metrics(self, metric_name, padding=None, scale='linear', cut_ticks = None, xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, names = None):
+    def plot_aggregated_metrics(self, metric_name, padding=None, scale='linear', cut_ticks = None, xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, legendsize = 10, names = None, store = False, storesize = (11,6)):
         """
         Plots the final value of the given metric for each experiment.
         The values are plotted left to right in order of insertion.
@@ -167,6 +167,8 @@ class Simulation():
             scale: pyplot scale format for both axes.
             cut_ticks: Dont create xticks for x values smaller than cut_ticks[0] or larger than cut_ticks[1].
         """
+        if store:
+            plt.rcParams["figure.figsize"] = storesize
         # Collect values for each experiment.
         vals = []
         experiment_names = []
@@ -174,7 +176,7 @@ class Simulation():
         for id, exp in self.experiments.items():
             if exp.was_run():
                 vals.append(exp.get_final_values(metric_name))
-                experiment_names.append(id)
+                experiment_names.append(exp.name)
                 xpos = exp.get_plot_position()
                 x_values.append(xpos if xpos is not None else (max(x_values)+1 if x_values else 1))
             else:
@@ -208,8 +210,12 @@ class Simulation():
         plt.xticks(x_values if not cut_ticks else [x for x in x_values if x >= cut_ticks[0] and x <= cut_ticks[1]], 
                     labels=experiment_names if not cut_ticks else [experiment_names[i] for i in range(len(experiment_names)) 
                     if x_values[i] >= cut_ticks[0] and x_values[i] <= cut_ticks[1]])
-        plt.legend()
+        plt.legend(prop={'size': legendsize})
         plt.title(f"Results of simulation \'{self.name}\' with {self.get_experiment_count()} experiments", fontsize = titlesize)
         if title:
             plt.title(title, fontsize = titlesize)
-        plt.show()
+        if not store:
+            plt.show()
+        else:
+            plt.savefig(self.name + "_" + metric_name + '.png', dpi=200)
+            plt.clf()

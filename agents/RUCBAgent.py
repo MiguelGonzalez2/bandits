@@ -95,4 +95,4 @@ class RUCBAgent(DBAgent):
         Returns:
             string representing the agent.
         """
-        return f"RUCB DB w/a: {self.alpha}"
+        return f"RUCB DB w/alpha: {self.alpha}"

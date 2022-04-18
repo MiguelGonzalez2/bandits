@@ -79,4 +79,4 @@ class ThompsonBetaAgent(MABAgent):
         Returns:
             string representing the agent.
         """
-        return f"Thompson Sampling MAB using Beta prior w/alpha={self.alpha}, beta={self.beta}"
+        return f"Thompson Sampling MAB, Beta prior w/alpha={self.alpha}, beta={self.beta}"

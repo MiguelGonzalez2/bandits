@@ -83,4 +83,4 @@ class DTSAgent(DBAgent):
         Returns:
             string representing the agent.
         """
-        return f"DTS DB w/a: {self.alpha}, b: {self.beta}, g: {self.gamma}"
+        return f"DTS DB w/alpha: {self.alpha}, beta: {self.beta}, gamma: {self.gamma}"

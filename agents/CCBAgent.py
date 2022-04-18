@@ -151,4 +151,4 @@ class CCBAgent(DBAgent):
         Returns:
             string representing the agent.
         """
-        return f"CCB DB w/a: {self.alpha}"
+        return f"CCB DB w/alpha: {self.alpha}"

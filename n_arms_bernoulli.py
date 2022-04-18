@@ -44,6 +44,11 @@ for n_arms in N_ARM_VALUES:
 
 sim.run_all(save = True)
 
-sim.plot_aggregated_metrics('copeland_regret', [-10, 10])
-sim.plot_aggregated_metrics('weak_regret', [-10, 10])
-sim.plot_aggregated_metrics('strong_regret', [-10, 10])
+names = ["Random", "IF", "BTM", "Doubler", "MultiSBM", "Sparring", "DTS", "RUCB", "CCB"]
+for i in range(len(N_ARM_VALUES)):
+    name = list(sim.experiments.values())[i].name
+    sim.experiments[name].name = str(N_ARM_VALUES[i])
+sim.plot_aggregated_metrics('copeland_regret', [-10, 10], xlabel="Número de brazos", ylabel = "Regret", title = "Brazos Bernoulli, 10000 épocas", labelsize=20, titlesize=22, legendsize=12, store = True, names = names, storesize = (12,6))
+#sim.plot_aggregated_metrics('copeland_regret', [-10, 10])
+#sim.plot_aggregated_metrics('weak_regret', [-10, 10])
+#sim.plot_aggregated_metrics('strong_regret', [-10, 10])

@@ -43,6 +43,11 @@ for transitivity in TRANSITIVITY_VALUES:
 
 sim.run_all(save = True)
 
-sim.plot_aggregated_metrics('copeland_regret', padding=[0.2, 0.2])
-sim.plot_aggregated_metrics('weak_regret', padding=[0.2, 0.2])
-sim.plot_aggregated_metrics('strong_regret', padding=[0.2, 0.2])
+names = ["Random", "IF", "BTM", "Doubler", "MultiSBM", "Sparring", "DTS", "RUCB", "CCB"]
+for i in range(len(TRANSITIVITY_VALUES)):
+    name = list(sim.experiments.values())[i].name
+    sim.experiments[name].name = str(TRANSITIVITY_VALUES[i])
+sim.plot_aggregated_metrics('copeland_regret', [0.2, 0.2], xlabel="Varianza/nivel del ruido", ylabel = "Regret", title = "10 brazos gaussianos ruidosos, 4000 épocas", labelsize=20, titlesize=22, legendsize=12, store = True, names = names, storesize = (12,6))
+#sim.plot_aggregated_metrics('copeland_regret', padding=[0.2, 0.2])
+#sim.plot_aggregated_metrics('weak_regret', padding=[0.2, 0.2])
+#sim.plot_aggregated_metrics('strong_regret', padding=[0.2, 0.2])

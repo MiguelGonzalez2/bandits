@@ -5,6 +5,7 @@ Class representing a MAB/DB experiment.
 from .Metrics import Metrics as mm
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from tqdm import tqdm
 import numpy as np
 import random
@@ -83,7 +84,7 @@ class Experiment():
         
         self.ran = True
 
-    def plot_metrics(self, metric_name, scale="linear"):
+    def plot_metrics(self, metric_name, scale="linear", xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, legendsize = 10, epoch_cutoff = None):
         """
         Plots and shows given metric for the experiment.
 
@@ -91,17 +92,33 @@ class Experiment():
             metric_name: Name of the desired metric within the available ones (check module "Metrics" or readme).
             scale: pyplot scale format for both axes.
         """
+        colormap = plt.cm.nipy_spectral
+        colors = [colormap(i) for i in np.linspace(0, 1, len(self.agents))]
+        mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=colors)
+
         plots = []
         for i in range(len(self.agents)):
             plt.xlabel('Epoch')
             plt.ylabel(metric_name)
-            plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
-        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))])
+            if epoch_cutoff:
+                plots += plt.plot(self.metrics[i].get_metrics()[metric_name][:epoch_cutoff], label=self.agents[i].get_name())
+            else:
+                plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
+        plt.xlabel('Epoch', fontsize = labelsize)
+        plt.ylabel(metric_name, fontsize = labelsize)
+        if xlabel:
+            plt.xlabel(xlabel, fontsize = labelsize)
+        if ylabel:
+            plt.ylabel(ylabel, fontsize = labelsize)
         plt.xscale(scale)
         plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
+        if title:
+            plt.title(title, fontsize = titlesize)
+        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))],prop={'size': legendsize})
+        plt.xscale(scale)
         plt.show()
 
-    def save_metrics(self, metric_name, scale="linear"):
+    def save_metrics(self, metric_name, scale="linear", xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, legendsize = 10, epoch_cutoff = None):
         """
         Plots and stores to png given metric for the experiment.
 
@@ -109,16 +126,32 @@ class Experiment():
             metric_name: Name of the desired metric within the available ones (check module "Metrics" or readme).
             scale: pyplot scale format for both axes.
         """
+        plt.rcParams["figure.figsize"] = (11, 6)
+        colormap = plt.cm.nipy_spectral
+        colors = [colormap(i) for i in np.linspace(0, 1, len(self.agents))]
+        mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=colors)
+
         plots = []
-        plt.rcParams["figure.figsize"] = (10, 7)
         for i in range(len(self.agents)):
             plt.xlabel('Epoch')
             plt.ylabel(metric_name)
-            plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
-        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))])
+            if epoch_cutoff:
+                plots += plt.plot(self.metrics[i].get_metrics()[metric_name][:epoch_cutoff], label=self.agents[i].get_name())
+            else:
+                plots += plt.plot(self.metrics[i].get_metrics()[metric_name], label=self.agents[i].get_name())
+        plt.xlabel('Epoch', fontsize = labelsize)
+        plt.ylabel(metric_name, fontsize = labelsize)
+        if xlabel:
+            plt.xlabel(xlabel, fontsize = labelsize)
+        if ylabel:
+            plt.ylabel(ylabel, fontsize = labelsize)
         plt.xscale(scale)
         plt.title(f"{self.agents[0].n_arms} arms, {self.n_repeats} simulations with {self.n_epochs} epochs each. Environment: {self.environment.get_name()}")
-        plt.savefig(self.name + "_" + metric_name + '.png')
+        if title:
+            plt.title(title, fontsize = titlesize)
+        plt.legend(plots, [self.agents[i].get_name() for i in range(len(self.agents))],prop={'size': legendsize})
+        plt.xscale(scale)
+        plt.savefig(self.name + "_" + metric_name + '.png', dpi=200)
         plt.clf()
 
     def get_name(self):
@@ -175,13 +208,16 @@ class Experiment():
         """
         return self.plot_position
 
-    def plot_metric_grid(self, metric_name, rows = 1, columns = 1, scale='linear', xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, xlabels = None, ylabels = None):
+    def plot_metric_grid(self, metric_name, rows = 1, columns = 1, scale='linear', xlabel = None, ylabel = None, title = None, labelsize = 10, titlesize = 10, xlabels = None, ylabels = None, store = False, storesize = (11,6)):
         """
-        Plots grid, intended for gridsearch.
+        Plots grid, intended for gridsearch results (view gridsearch.py for sample usage).
 
-        xlabels -> horizontal labels left to right.
-        ylabels -> vertical labels bottom to top.
+        Args:
+            xlabels: horizontal labels left to right.
+            ylabels: vertical labels bottom to top.
         """
+        if store:
+            plt.rcParams["figure.figsize"] = storesize
         # Collect values for each experiment.
         vals = np.array(list(self.get_final_values(metric_name).values()))
 
@@ -206,4 +242,8 @@ class Experiment():
         if ylabels:
             plt.yticks(range(rows), ylabels)
         plt.colorbar()
-        plt.show()
+        if not store:
+            plt.show()
+        else:
+            plt.savefig(self.name + "_" + metric_name + '.png', dpi=200)
+            plt.clf()

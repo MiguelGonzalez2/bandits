@@ -16,6 +16,12 @@ N_ARM_VALUES = [100]
 
 sim = Simulation(f"Thompson Sampling Gridsearch, {N_EPOCHS} epochs, {N_ARM_VALUES[0]} arms.")
 
+def str2(int):
+    result = str(int)
+    if result[-3:] == "000":
+        result = result[:-3] + "k"
+    return result
+
 alphas = [0.01, 0.05, 0.1, 0.5, 1, 5, 10, 50, 100, 1000, 5000, 10000]
 betas = [0.01, 0.05, 0.1, 0.5, 1, 5, 10, 50, 100, 1000, 5000, 10000]
 agents = []
@@ -33,8 +39,7 @@ for n_arms in N_ARM_VALUES:
 
 sim.run_all(save = True)
 
-
-list(sim.experiments.values())[0].plot_metric_grid('copeland_regret', rows = len(alphas), columns = len(betas), xlabels=[str(x) for x in alphas], ylabels=[str(x) for x in betas], xlabel = "Alpha", ylabel= "Beta")
+list(sim.experiments.values())[0].plot_metric_grid('copeland_regret', title=f"Sparring, {N_ARM_VALUES[0]} brazos Gaussianos, 10000 épocas",rows = len(alphas), columns = len(betas), xlabels=[str2(x) for x in alphas], ylabels=[str2(x) for x in betas], xlabel = "Alpha", ylabel= "Beta", labelsize=10, titlesize=11, store = True, storesize = (6,6))
 #sim.plot_aggregated_metrics('copeland_regret', [-10, 10])
 #sim.plot_aggregated_metrics('weak_regret', [-10, 10])
 #sim.plot_aggregated_metrics('strong_regret', [-10, 10])

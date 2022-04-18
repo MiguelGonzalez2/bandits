@@ -16,8 +16,7 @@ MAX_N_REPEATS = 200 # Maximum number of repeats
 N_ARM_VALUES = [10, 20, 30, 50, 100, 150, 200]
 
 sim = Simulation(f"change arm number, {N_EPOCHS} epochs, different sparrings")
-sim = sim.load_state()
-"""
+
 for n_arms in N_ARM_VALUES:
     agents = []
     agents.append(SparringAgent(n_arms, ThompsonBetaAgent(n_arms), ThompsonBetaAgent(n_arms)))
@@ -38,7 +37,7 @@ for n_arms in N_ARM_VALUES:
 
     n_repeats = min(int(N_REPEATS * float(N_ARM_VALUES[-1])**2 / float(n_arms)**2), MAX_N_REPEATS)
     sim.add_experiment(Experiment(f"N = {n_arms}", agents, environ, N_EPOCHS, n_repeats, plot_position=n_arms))
-"""
+
 sim.run_all(save = True)
 
 sim.plot_aggregated_metrics('copeland_regret', [-10, 10])
